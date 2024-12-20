@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "GltfPrimitive",
+ "referent": "RBXad8372dd271045a2b710b0f17f1c8b04",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "GltfPrimitive"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{0de6f982-4814-4d62-b8f8-cadbdd440cf7}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local GltfPrimitive = {}\nGltfPrimitive.__index = GltfPrimitive\nGltfPrimitive.__objectType = \"GltfPrimitive\"\n\nfunction GltfPrimitive.new()\n\tlocal self = setmetatable({\n\t\t_exporter = nil,\n\t\t_attributes = {},\n\t\t_material = nil,\n\t\t_indices = nil\n\t}, GltfPrimitive)\n\n\treturn self\nend\n\nfunction GltfPrimitive:SetExporter(exporter)\n\tself._exporter = exporter\nend\n\nfunction GltfPrimitive:SetMaterial(material)\n\tself._material = material\nend\n\nfunction GltfPrimitive:SetIndices(indices)\n\tself._indices = indices\nend\n\nfunction GltfPrimitive:AddAttribute(attributeName, value)\n\tself._attributes[attributeName] = value\nend\n\nfunction GltfPrimitive:SetAttributes(attributes)\n\tself._attributes = attributes\nend\n\nfunction GltfPrimitive:ToJsonData()\n\tlocal jsonData = {\n\t\tname = self._name,\n\t\tmode = 4, -- 4 for triangles: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#schema-reference-mesh-primitive\n\t\tindices = self._exporter:GetObjectIndex(self._indices),\n\t\tattributes = {}\n\t}\n\t\n\tif self._material then\n\t\tjsonData.material = self._exporter:GetObjectIndex(self._material)\n\tend\n\t\n\tfor name, value in self._attributes do\n\t\tjsonData.attributes[name] = self._exporter:GetObjectIndex(value)\n\tend\n\n\treturn jsonData\nend\n\nfunction GltfPrimitive:Destroy()\n\tself._exporter = nil\nend\n\nreturn GltfPrimitive"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

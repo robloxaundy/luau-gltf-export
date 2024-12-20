@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "Mesh",
+ "referent": "RBX0db7268fb41b4cd39314b5cc6bc7016e",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "Mesh"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{c792032d-89ad-4300-bd84-793315f9c6f2}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local SourceFolder = script.Parent.Parent\n\nlocal Vertex = require(SourceFolder.Geometry.Vertex)\n\nlocal Mesh = {}\nMesh.__index = Mesh\nMesh.__objectType = \"Mesh\"\n\nfunction Mesh.new()\n\tlocal self = setmetatable({\n\t\t_positions = {},\n\t\t_normals = {},\n\t\t_uvs = {},\n\t\t_vertexColors = {},\n\t\t_verticies = {},\n\t\t_polygons = {},\n\t\t_min = Vector3.new(math.huge, math.huge, math.huge),\n\t\t_max = Vector3.new(-math.huge, -math.huge, -math.huge),\n\t}, Mesh)\n\t\n\treturn self\nend\n\nfunction Mesh:_updateBounds(position)\n\tif position.X < self._min.X or \n\t\tposition.Y < self._min.Y or\n\t\tposition.Z < self._min.Z then\n\t\tself._min = Vector3.new(\n\t\t\tmath.min(position.X, self._min.X),\n\t\t\tmath.min(position.Y, self._min.Y),\n\t\t\tmath.min(position.Z, self._min.Z))\n\tend\n\tif position.X > self._max.X or \n\t\tposition.Y > self._max.Y or\n\t\tposition.Z > self._max.Z then\n\t\tself._max = Vector3.new(\n\t\t\tmath.max(position.X, self._max.X),\n\t\t\tmath.max(position.Y, self._max.Y),\n\t\t\tmath.max(position.Z, self._max.Z))\n\tend\nend\n\nfunction Mesh:AddPosition(position : Vector3)\n\tself:_updateBounds(position)\n\ttable.insert(self._positions, position)\n\treturn #self._positions\nend\n\nfunction Mesh:AddNormal(normal : Vector3)\n\t--if typeof(normal) ~= \"Vector3\" then error() end\n\ttable.insert(self._normals, normal)\n\treturn #self._normals\nend\n\nfunction Mesh:AddUV(uv : Vector2)\n\ttable.insert(self._uvs, uv)\n\treturn #self._uvs\nend\n\nfunction Mesh:AddVertexColor(color : Color3)\n\ttable.insert(self._vertexColors, color)\n\treturn #self._vertexColors\nend\n\nfunction Mesh:AddVertex(vertex)\n\ttable.insert(self._verticies, vertex)\n\treturn #self._verticies\nend\n\nfunction Mesh:AddTriangle(index1, index2, index3)\n\ttable.insert(self._polygons, {index1, index2, index3})\n\treturn #self._polygons\nend\n\nlocal function arrayHelper(verticies, vertexType, values, default)\n\tlocal array = {}\n\tlocal vertexType = Vertex.indexLookups.POSITION_INDEX\n\n\tfor index, vertex in verticies do\n\t\tlocal valueIndex = vertex:getValue(vertexType)\n\t\tif valueIndex ~= -1 then\n\t\t\ttable.insert(array, values[valueIndex])\n\t\telse\n\t\t\ttable.insert(array, default)\n\t\tend\n\tend\n\n\treturn array\nend\n\nfunction Mesh:GetTriangleIndiciesArray()\n\tlocal array = {}\n\tfor _, polygon in self._polygons do\n\t\tif #polygon ~= 3 then\n\t\t\terror(\"Triangulation not supported\")\n\t\tend\n\t\tfor _, index in polygon do\n\t\t\ttable.insert(array, index - 1)\n\t\tend\n\tend\n\treturn array\nend\n\nfunction Mesh:GetPositionArray()\n\treturn arrayHelper(self._verticies, Vertex.indexLookups.POSITION_INDEX, self._positions, Vector3.zero)\nend\n\nfunction Mesh:GetNormalArray()\n\treturn arrayHelper(self._verticies, Vertex.indexLookups.POSITION_INDEX, self._normals, Vector3.yAxis)\nend\n\nfunction Mesh:GetUvArray()\n\treturn arrayHelper(self._verticies, Vertex.indexLookups.POSITION_INDEX, self._uvs, Vector2.zero)\nend\n\nfunction Mesh:GetMax()\n\treturn self._max\nend\n\nfunction Mesh:GetMin()\n\treturn self._min\nend\n\nfunction Mesh:RecalculateBounds()\n\tself._min = Vector3.new(math.huge, math.huge, math.huge)\n\tself._max = Vector3.new(-math.huge, -math.huge, -math.huge)\n\tfor _, position in self._positions do\n\t\tself:_updateBounds(position)\n\tend\nend\n\n\nreturn Mesh\n"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

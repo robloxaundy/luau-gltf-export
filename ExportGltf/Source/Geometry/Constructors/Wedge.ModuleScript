@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "Wedge",
+ "referent": "RBX1e5e4dee7a894ebaa03d0f5595941a46",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "Wedge"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{2694436e-ed95-4647-b6f6-9f1e8f9f112d}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local SourceFolder = script.Parent.Parent.Parent\n\nlocal Mesh = require(SourceFolder.Geometry.Mesh)\n\nlocal GetDirectionFromFace = require(SourceFolder.Geometry.Constructors.Helpers.GetDirectionFromFace)\nlocal GetSignedDirectionFromFace = require(SourceFolder.Geometry.Constructors.Helpers.GetSignedDirectionFromFace)\nlocal CreateMeshVertex = require(SourceFolder.Geometry.Constructors.Helpers.CreateMeshVertex)\nlocal AddCubeFace = require(SourceFolder.Geometry.Constructors.Helpers.AddCubeFace)\nlocal CreateQuad = require(SourceFolder.Geometry.Constructors.Helpers.CreateQuad)\n\nreturn function (color : Color3)\n\tlocal wedge = Mesh.new()\n\n\t-- Z Positive and Y Negative are full faces\n\tlocal fullFaces = {3, 2 + 3};\n\tfor _, face in fullFaces do\n\t\tAddCubeFace(wedge, face, color)\n\tend\n\n\t-- Z Negative and Y Positive are combined into one face\n\tlocal up = Vector3.yAxis / 2\n\tlocal right = Vector3.xAxis / 2\n\tlocal forward = Vector3.zAxis / 2\n\tlocal normal = (up - forward).Unit\n\tlocal index0 = CreateMeshVertex(wedge, forward + up + right, normal, Vector2.new(1, math.sqrt(2)), color)\n\tlocal index1 = CreateMeshVertex(wedge, -forward - up + right, normal, Vector2.new(1, 0), color)\n\tlocal index2 = CreateMeshVertex(wedge, -forward - up - right, normal, Vector2.new(0, 0), color)\n\tlocal index3 = CreateMeshVertex(wedge, forward + up - right, normal, Vector2.new(0, math.sqrt(2)), color)\n\n\tCreateQuad(wedge, index0, index1, index2, index3)\n\n\n\t-- X Positive and X Negative are just 1 triangle\n\tfor direction = -1, 1, 2 do\n\t\tlocal side = (direction + 1) / 2\n\t\tlocal sideNormal = right * 2 * direction\n\t\tlocal index0 = CreateMeshVertex(wedge, forward + up + right * direction, sideNormal, Vector2.new(side, 1), color)\n\t\tlocal index1 = CreateMeshVertex(wedge, forward - up + right * direction, sideNormal, Vector2.new(0, 0), color)\n\t\tlocal index2 = CreateMeshVertex(wedge, -forward - up + right * direction, sideNormal, Vector2.new(1, 0), color)\n\t\t\n\t\tif side == 0 then\n\t\t\twedge:AddTriangle(index0, index2, index1)\n\t\telse\n\t\t\twedge:AddTriangle(index0, index1, index2)\n\t\tend\n\tend\n\n\treturn wedge\nend"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "GltfTemplate",
+ "referent": "RBXdfd24c2b99bd472fbf1042ee8b0b316c",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "GltfTemplate"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{fddb53e8-e34d-488a-be32-8cc589d7cc6f}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local GltfTemplate = {}\nGltfTemplate.__index = GltfTemplate\nGltfTemplate.__objectType = \"GltfTemplate\"\n\nfunction GltfTemplate.new()\n\tlocal self = setmetatable({\n\t\t_exporter = nil,\n\t\t_name = nil\n\t}, GltfTemplate)\n\n\treturn self\nend\n\nfunction GltfTemplate:SetExporter(exporter)\n\tself._exporter = exporter\nend\n\nfunction GltfTemplate:SetName(name)\n\tself._name = name\nend\n\nfunction GltfTemplate:ToJsonData()\n\tlocal jsonData = {\n\t\tname = self._name,\n\t}\n\n\treturn jsonData\nend\n\nfunction GltfTemplate:Destroy()\n\tself._exporter = nil\nend\n\nreturn GltfTemplate"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "CreateQuad",
+ "referent": "RBXc1e5efc021ef4974b6d7e23a6798ddb2",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "CreateQuad"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{035f9a2d-bd75-460f-80a4-f671d846194c}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "return function(mesh, p1, p2, p3, p4)\n\tmesh:AddTriangle(p1, p2, p3)\n\tmesh:AddTriangle(p3, p4, p1)\nend"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

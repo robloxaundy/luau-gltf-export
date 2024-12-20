@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "GetSimpleSampler",
+ "referent": "RBX1610642c12d44fd1a24a247a8608ac00",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "GetSimpleSampler"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{8a0d3c96-11af-4e4b-8619-5718e775bfcb}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local SourceFolder = script.Parent.Parent.Parent\n\nlocal GltfSampler = require(SourceFolder.Gltf.GltfSampler)\n\nlocal SIMPLE_SAMPLER_NAME = \"Simple Sampler :)\"\n\nreturn function(exporter)\n\tlocal sampler = exporter._caches.samplerLookup[SIMPLE_SAMPLER_NAME]\n\tif sampler then return sampler end\n\t\n\tsampler = GltfSampler.new()\n\tsampler:SetExporter(exporter)\n\n\texporter.samplers[sampler] = true\n\texporter._caches.samplerLookup[SIMPLE_SAMPLER_NAME] = sampler\n\treturn sampler\nend"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

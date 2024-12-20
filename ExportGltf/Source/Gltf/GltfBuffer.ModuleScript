@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "GltfBuffer",
+ "referent": "RBX37f7a1d8170044858c1dda8b8b56c537",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "GltfBuffer"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{7dd5bba5-e181-4f9f-85e0-7290877f8a0d}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local GltfBuffer = {}\nGltfBuffer.__index = GltfBuffer\nGltfBuffer.__objectType = \"GltfBuffer\"\n\nfunction GltfBuffer.new()\n\tlocal self = setmetatable({\n\t\t_exporter = nil,\n\t\t_name = nil,\n\t\t_uri = \"\",\n\t\t_byteLength = 0\n\t}, GltfBuffer)\n\n\treturn self\nend\n\nfunction GltfBuffer:SetExporter(exporter)\n\tself._exporter = exporter\nend\n\nfunction GltfBuffer:SetName(name)\n\tself._name = name\nend\n\nfunction GltfBuffer:SetUri(uri)\n\tself._uri = uri\nend\n\nfunction GltfBuffer:SetByteLength(byteLength)\n\tself._byteLength = byteLength\nend\n\nfunction GltfBuffer:ToJsonData()\n\tlocal jsonData = {\n\t\tname = self._name,\n\t\turi = self._uri,\n\t\tbyteLength = self._byteLength\n\t}\n\n\treturn jsonData\nend\n\nfunction GltfBuffer:Destroy()\n\tself._exporter = nil\nend\n\nreturn GltfBuffer"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

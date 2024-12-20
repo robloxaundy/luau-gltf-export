@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "GetPrimitiveAccessors",
+ "referent": "RBX649a82f98aa64c5d91b4edc190807377",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "GetPrimitiveAccessors"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{cc2b768c-979a-4f80-8e06-00c2f2522342}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local SourceFolder = script.Parent.Parent.Parent\n\nlocal GltfAccessor = require(SourceFolder.Gltf.GltfAccessor)\nlocal GltfBufferView = require(SourceFolder.Gltf.GltfBufferView)\nlocal GltfBuffer = require(SourceFolder.Gltf.GltfBuffer)\n\nlocal LoadMesh = require(SourceFolder.Gltf.Helpers.LoadMesh)\nlocal ArrayToUri = require(SourceFolder.Gltf.Helpers.ArrayToUri)\n\nlocal TargetEnum = require(SourceFolder.Gltf.Helpers.TargetEnum)\n\nlocal function accessorHelper(exporter, array, arrayType)\n\tlocal uri, count, byteSize, accessorType, componentType = ArrayToUri(array, arrayType)\n\t\n\tlocal newBuffer = GltfBuffer.new()\n\tnewBuffer:SetExporter(exporter)\n\tnewBuffer:SetByteLength(byteSize)\n\tnewBuffer:SetUri(uri)\n\texporter.buffers[newBuffer] = true\n\t\n\tlocal bufferView = GltfBufferView.new()\n\tbufferView:SetExporter(exporter)\n\tbufferView:SetByteLength(byteSize)\n\tbufferView:SetBuffer(newBuffer)\n\texporter.bufferViews[bufferView] = true\n\t\n\t\n\tlocal accessor = GltfAccessor.new()\n\taccessor:SetExporter(exporter)\n\taccessor:SetType(accessorType)\n\taccessor:SetCount(count)\n\taccessor:SetComponentType(componentType)\n\taccessor:SetBufferView(bufferView)\n\texporter.accessors[accessor] = true\n\t\n\treturn accessor\nend\n\nlocal function makeIndiciesAccessor(exporter, mesh)\n\tlocal indiciesArray = mesh:GetTriangleIndiciesArray()\n\t\n\tlocal accessor = accessorHelper(exporter, indiciesArray, \"Integer\")\n\taccessor._bufferView:SetTarget(TargetEnum.ElementArrayBuffer)\n\t\n\treturn accessor\nend\n\nlocal function makePositionAccessor(exporter, mesh)\n\tlocal positionArray = mesh:GetPositionArray()\n\tlocal accessor = accessorHelper(exporter, positionArray, \"Vector3\")\n\t\n\tlocal max = mesh:GetMax()\n\tlocal min = mesh:GetMin()\n\taccessor:SetMax({max.X, max.Y, max.Z})\n\taccessor:SetMin({min.X, min.Y, min.Z})\n\t\n\treturn accessor\nend\n\nlocal function makeNormalAccessor(exporter, mesh)\n\tlocal normalArray = mesh:GetNormalArray()\n\treturn accessorHelper(exporter, normalArray, \"Vector3\")\nend\n\nlocal function makeUvAccessor(exporter, mesh)\n\tlocal uvArray = mesh:GetUvArray()\n\treturn accessorHelper(exporter, uvArray, \"Vector2\")\nend\n\nreturn function(exporter, identifier)\n\tlocal meshLoaded = exporter._caches.meshLoaded[identifier:GetString()]\n\t\n\tlocal mesh\n\tif not meshLoaded then\n\t\tmesh = LoadMesh(identifier)\n\tend\n\t\n\tlocal indiciesIdentifier = identifier:GetString() .. \"INDICIES\"\n\tlocal indicies = exporter._caches.accessorLookup[indiciesIdentifier]\n\tif indicies == nil then\n\t\tindicies = makeIndiciesAccessor(exporter, mesh)\n\t\texporter._caches.accessorLookup[indiciesIdentifier] = indicies\n\tend\n\t\n\tlocal attributes = {}\n\t\n\tlocal positionIdentifier = identifier:GetString() .. \"POSITION\"\n\tlocal position = exporter._caches.accessorLookup[positionIdentifier]\n\tif position == nil then\n\t\tposition = makePositionAccessor(exporter, mesh)\n\t\texporter._caches.accessorLookup[positionIdentifier] = position\n\tend\n\tattributes.POSITION = position\n\t\n\tlocal normalIdentifier = identifier:GetString() .. \"NORMAL\"\n\tlocal normal = exporter._caches.accessorLookup[normalIdentifier]\n\tif normal == nil then\n\t\tnormal = makeNormalAccessor(exporter, mesh)\n\t\texporter._caches.accessorLookup[normalIdentifier] = normal\n\tend\n\tattributes.NORMAL = normal\n\t\n\tlocal uvIdentifier = identifier:GetString() .. \"TEXCOORD_0\"\n\tlocal uv = exporter._caches.accessorLookup[uvIdentifier]\n\tif uv == nil then\n\t\tuv = makeUvAccessor(exporter, mesh)\n\t\texporter._caches.accessorLookup[uvIdentifier] = uv\n\tend\n\tattributes.TEXCOORD_0 = uv\n\t\n\texporter._caches.meshLoaded[identifier:GetString()] = true\n\t\n\treturn indicies, attributes\nend"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

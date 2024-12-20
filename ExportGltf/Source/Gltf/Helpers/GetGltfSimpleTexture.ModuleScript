@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "GetGltfSimpleTexture",
+ "referent": "RBX572f8a9b4c1a46eba4c7d97b94f308bc",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "GetGltfSimpleTexture"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{d0b77c39-d09b-4f34-a1e8-e1a644d2adb9}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local SourceFolder = script.Parent.Parent.Parent\n\nlocal GltfMaterial = require(SourceFolder.Gltf.GltfMaterial)\nlocal GltfTexture = require(SourceFolder.Gltf.GltfTexture)\nlocal GltfImage = require(SourceFolder.Gltf.GltfImage)\n\nlocal GetSimpleSampler = require(SourceFolder.Gltf.Helpers.GetSimpleSampler)\n\nlocal PngBufferFromUri = require(SourceFolder.Image.PngBufferFromUri)\n\nlocal Base64EncodeBuffer = require(SourceFolder.Utilities.Base64EncodeBuffer)\n\nlocal BASE_64_PREFIX = \"data:image/png;base64,\"\n\nreturn function(exporter, assetId)\n\tlocal texture = exporter._caches.textureLookup[assetId]\n\tif texture then return texture end\n\t\n\tlocal imageBuffer, bufferSize = PngBufferFromUri(assetId)\n\tif imageBuffer == nil then return end\n\t\n\t\n\ttexture = GltfTexture.new()\n\tGltfTexture:SetExporter(exporter)\n\tGltfTexture:SetSampler(GetSimpleSampler(exporter))\n\t\n\tlocal gltfImage = GltfImage.new()\n\tgltfImage:SetExporter(exporter)\n\tGltfImage:SetUri(Base64EncodeBuffer(imageBuffer, BASE_64_PREFIX, bufferSize))\n\t--GltfImage:SetUri(BASE_64_PREFIX .. imageBuffer)\n\texporter.images[GltfImage] = true\n\t\n\tGltfTexture:SetSource(GltfImage)\n\t\n\texporter.textures[texture] = true\n\texporter._caches.textureLookup[assetId] = texture\n\treturn texture\nend"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "PngBufferFromUri",
+ "referent": "RBXee87d929c2c241259442543ed8338076",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "PngBufferFromUri"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{b0b99b00-d8e7-49a0-9476-995cbbff1496}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local SourceFolder = script.Parent.Parent\n\nlocal PngEncoder = require(SourceFolder.Image.PngEncoder)\n\nlocal AssetService = game:GetService(\"AssetService\")\n\nreturn function(uri)\n\tlocal content = Content.fromUri(uri)\n\tlocal editableImage = AssetService:CreateEditableImageAsync(content)\n\n\tlocal size = editableImage.Size\n\n\tif size.X == 0 or size.Y == 0 then return end\n\t\n\tlocal encoder = PngEncoder.new(size.X, size.Y)\n\t\n\tlocal pixelsBuffer = editableImage:ReadPixelsBuffer(Vector2.zero, editableImage.Size)\n\tfor index = 1, size.X * size.Y * 4, 4 do\n\t\tencoder:write({\n\t\t\tbuffer.readu8(pixelsBuffer, index - 1),\n\t\t\tbuffer.readu8(pixelsBuffer, index),\n\t\t\tbuffer.readu8(pixelsBuffer, index + 1)\n\t\t})\n\tend\n\t\n\tlocal byteSize = encoder.offset\n\tlocal padding = (3 - byteSize % 3) % 3\n\t\n\treturn encoder.outBuffer, byteSize + padding\nend"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "GetSignedDirectionFromFace",
+ "referent": "RBX16788c80bcc34089ad50706f2bd80694",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "GetSignedDirectionFromFace"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{3bb0d341-14a7-4b55-b997-a7855e93a2d3}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local SourceFolder = script.Parent.Parent.Parent.Parent\n\nlocal GetDirectionFromFace = require(SourceFolder.Geometry.Constructors.Helpers.GetDirectionFromFace)\n\nreturn function(faceIndex)\n\tlocal orientation = if faceIndex > 3 then -1 else 1\n\treturn GetDirectionFromFace(faceIndex) * orientation\nend"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

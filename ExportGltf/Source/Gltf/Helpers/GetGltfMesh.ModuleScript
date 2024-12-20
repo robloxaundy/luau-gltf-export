@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "GetGltfMesh",
+ "referent": "RBX18043cdc3be14c348a705acd0db02bbb",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "GetGltfMesh"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{1fc4db95-a32a-4564-98d8-89976e563422}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local SourceFolder = script.Parent.Parent.Parent\n\nlocal GltfMesh = require(SourceFolder.Gltf.GltfMesh)\nlocal GltfPrimitive = require(SourceFolder.Gltf.GltfPrimitive)\n\nlocal GetPrimitiveAccessors = require(SourceFolder.Gltf.Helpers.GetPrimitiveAccessors)\nlocal GetGltfMaterial = require(SourceFolder.Gltf.Helpers.GetGltfMaterial)\n\n\nreturn function(exporter, meshIdentifier, materialIdentifier)\n\tlocal totalIdentifier = meshIdentifier:GetString() .. materialIdentifier:GetString()\n\t\n\tlocal mesh = exporter._caches.meshLookup[totalIdentifier]\n\tif mesh then return mesh end\n\t\n\tmesh = GltfMesh.new()\n\tmesh:SetExporter(exporter)\n\t\n\tlocal primitive = GltfPrimitive.new()\n\tprimitive:SetExporter(exporter)\n\t\n\tlocal indicies, accessors = GetPrimitiveAccessors(exporter, meshIdentifier)\n\tprimitive:SetIndices(indicies)\n\tprimitive:SetAttributes(accessors)\n\t\n\tlocal material = GetGltfMaterial(exporter, materialIdentifier)\n\tprimitive:SetMaterial(material)\n\t\n\tmesh:AddPrimitive(primitive)\n\texporter.meshes[mesh] = true\n\t\n\texporter._caches.meshLookup[totalIdentifier] = mesh\n\t\n\treturn mesh\nend"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

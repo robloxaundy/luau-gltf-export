@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "GltfNode",
+ "referent": "RBX8aa8c45da3b344de8a0264185ce15112",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "GltfNode"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{dea28016-15d6-4e83-82df-b70989e6eb74}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local CFRAME_EPSILON = 0.00001\n\nlocal SourceFolder = script.Parent.Parent\n\nlocal Matrix4 = require(SourceFolder.Math.Matrix4)\nlocal Quaternion = require(SourceFolder.Math.Quaternion)\n\nlocal GltfNode = {}\nGltfNode.__index = GltfNode\nGltfNode.__objectType = \"GltfNode\"\n\nfunction GltfNode.new()\n\tlocal self = setmetatable({\n\t\t_exporter = nil,\n\t\t_name = nil,\n\t\t_parent = nil,\n\t\t_children = {},\n\t\t_cframe  = CFrame.identity,\n\t\t_scale = Vector3.one,\n\t\t_mesh = nil,\n\t}, GltfNode)\n\t\n\treturn self\nend\n\nfunction GltfNode:SetExporter(exporter)\n\tself._exporter = exporter\nend\n\nfunction GltfNode:SetName(name)\n\tself._name = name\nend\n\nfunction GltfNode:SetParent(node)\n\tself._parent = node\nend\n\nfunction GltfNode:SetCFrame(cframe)\n\tself._cframe = cframe\nend\n\nfunction GltfNode:SetScale(scale)\n\tself._scale = scale\nend\n\nfunction GltfNode:SetMesh(mesh)\n\tself._mesh = mesh\nend\n\nfunction GltfNode:AddChild(node)\n\ttable.insert(self._children, node)\nend\n\nlocal function getRotationFromCFrame(cframe)\n\tlocal matrix = Matrix4.fromCFrame(cframe)\n\treturn Quaternion.fromMatrix(matrix.elt):normalized()\nend\n\nfunction GltfNode:ToJsonData()\n\tlocal jsonData = {\n\t\tname = self._name,\n\t}\n\t\n\t-- Populate transform data\n\tif self._parent == nil or not self._parent._cframe:FuzzyEq(self._cframe, CFRAME_EPSILON) then\n\t\tlocal relativeCframe = self._cframe\n\t\tif self._parent then\n\t\t\trelativeCframe = self._parent._cframe:ToObjectSpace(relativeCframe)\n\t\tend\n\t\tlocal rotation = getRotationFromCFrame(relativeCframe)\n\t\tlocal translation = relativeCframe.Position\n\t\tjsonData.rotation = {rotation.x, rotation.y, rotation.z, rotation.w}\n\t\tjsonData.translation = {translation.x, translation.y, translation.z}\n\tend\n\t\n\tif not self._scale:FuzzyEq(Vector3.one) then\n\t\tjsonData.scale = {self._scale.x, self._scale.y, self._scale.z}\n\tend\n\t\n\tif self._mesh ~= nil then\n\t\tjsonData.mesh = self._exporter:GetObjectIndex(self._mesh)\n\tend\n\t\n\t-- Populate children\n\tif next(self._children) then\n\t\tjsonData.children = {}\n\t\tfor _, child in self._children do\n\t\t\ttable.insert(jsonData.children, self._exporter:GetObjectIndex(child))\n\t\tend\n\tend\n\t\n\treturn jsonData\nend\n\nfunction GltfNode:Destroy()\n\tself._exporter = nil\n\tself._parent = nil\n\tself._children = nil\nend\n\nreturn GltfNode"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

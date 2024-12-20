@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "FromMeshId",
+ "referent": "RBXd8ae56dac73147269e1f8d29012a6d85",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "FromMeshId"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{967b6b33-4dcd-49bf-8b8d-a21f2ff19fe7}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local SourceFolder = script.Parent.Parent.Parent\n\nlocal Mesh = require(SourceFolder.Geometry.Mesh)\nlocal Vertex = require(SourceFolder.Geometry.Vertex)\n\nlocal ApplyMatrixToMesh = require(SourceFolder.Geometry.Manipulation.ApplyMatrixToMesh)\n\nlocal Matrix4 = require(SourceFolder.Math.Matrix4)\n\nlocal AssetService = game:GetService(\"AssetService\")\n\nreturn function(uri)\n\tlocal mesh = Mesh.new()\n\t\n\tlocal content = Content.fromUri(uri)\n\tlocal editableMesh = AssetService:CreateEditableMeshAsync(content)\n\t\n\tlocal positionLookup = {}\n\tfor _, vertexId in editableMesh:GetVertices() do\n\t\tpositionLookup[vertexId] = mesh:AddPosition(editableMesh:GetPosition(vertexId))\n\tend\n\t\n\tlocal normalLookup = {}\n\tfor _, normalId in editableMesh:GetNormals() do\n\t\tnormalLookup[normalId] = mesh:AddNormal(editableMesh:GetNormal(normalId))\n\tend\n\t\n\tlocal uvLookup = {}\n\tfor _, uvId in editableMesh:GetUVs() do\n\t\tuvLookup[uvId] = mesh:AddUV(editableMesh:GetUV(uvId))\n\tend\n\t\n\tfor _, faceId in editableMesh:GetFaces() do\n\t\tlocal positions = editableMesh:GetFaceVertices(faceId)\n\t\tlocal normals = editableMesh:GetFaceNormals(faceId)\n\t\tlocal uvs = editableMesh:GetFaceUVs(faceId)\n\t\t\n\t\tlocal face = {}\n\t\t\n\t\tfor index, position in positions do\n\t\t\tlocal vertex = Vertex.new(\n\t\t\t\tpositionLookup[position],\n\t\t\t\tnormalLookup[normals[index]] or -1,\n\t\t\t\tuvLookup[uvs[index]] or -1\n\t\t\t)\n\t\t\ttable.insert(face, mesh:AddVertex(vertex))\n\t\tend\n\t\t\n\t\tmesh:AddTriangle(table.unpack(face))\n\tend\n\t\n\tlocal center = (mesh:GetMax() + mesh:GetMin()) / 2\n\tlocal scale = mesh:GetMax() - mesh:GetMin()\n\tlocal inverseScale = Vector3.new(1 / scale.X, 1 / scale.Y, 1 / scale.Z)\n\t\n\tlocal transform = Matrix4.fromVectorScale(inverseScale) * Matrix4.fromVectorTranslation(-center)\n\t\n\tApplyMatrixToMesh(mesh, transform)\n\t\n\treturn mesh\nend"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

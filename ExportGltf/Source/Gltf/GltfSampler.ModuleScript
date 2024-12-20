@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "GltfSampler",
+ "referent": "RBXbd7aff55cbb34c3784dc84f9d01c8e3c",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "GltfSampler"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{96672018-dee3-4f52-b6ee-49d38c521d8f}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local SourceFolder = script.Parent.Parent\n\nlocal MagFilterEnum = require(SourceFolder.Gltf.Helpers.MagFilterEnum)\nlocal MinFilterEnum = require(SourceFolder.Gltf.Helpers.MinFilterEnum)\n\nlocal GltfSampler = {}\nGltfSampler.__index = GltfSampler\nGltfSampler.__objectType = \"GltfSampler\"\n\nfunction GltfSampler.new()\n\tlocal self = setmetatable({\n\t\t_exporter = nil,\n\t\t_magFilter = MagFilterEnum.Linear,\n\t\t_minFilter = MinFilterEnum.LinearMipmapLinear,\n\t}, GltfSampler)\n\n\treturn self\nend\n\nfunction GltfSampler:SetExporter(exporter)\n\tself._exporter = exporter\nend\n\nfunction GltfSampler:ToJsonData()\n\tlocal jsonData = {\n\t\tname = self._name,\n\t\tmagFilter = self._magFilter,\n\t\tminFilter = self._minFilter\n\t}\n\n\treturn jsonData\nend\n\nfunction GltfSampler:Destroy()\n\tself._exporter = nil\nend\n\nreturn GltfSampler"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

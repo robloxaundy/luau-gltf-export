@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "LoadMesh",
+ "referent": "RBX817b1dd619514f3fb0a74da226065289",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "LoadMesh"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{06cd1bfe-09ad-486a-9c5b-7533c122f7d8}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local SourceFolder = script.Parent.Parent.Parent\n\nlocal Ball = require(SourceFolder.Geometry.Constructors.Ball)\nlocal Block = require(SourceFolder.Geometry.Constructors.Block)\nlocal Cylinder = require(SourceFolder.Geometry.Constructors.Cylinder)\nlocal FromMeshId = require(SourceFolder.Geometry.Constructors.FromMeshId)\nlocal Wedge = require(SourceFolder.Geometry.Constructors.Wedge)\n\nlocal function blockHandler(identifier)\n\treturn Block(identifier:GetColor() or Color3.new())\nend\n\nlocal function ballHandler(identifier)\n\treturn Ball(identifier:GetColor() or Color3.new())\nend\n\nlocal function cylinderHandler(identifier)\n\treturn Cylinder(identifier:GetColor() or Color3.new())\nend\n\nlocal function meshIdHandler(identifier)\n\treturn FromMeshId(identifier:GetMeshId())\nend\n\nlocal function wedgeHandler(identifier)\n\treturn Wedge(identifier:GetColor() or Color3.new())\nend\n\nlocal SHAPE_HANDLERS = {\n\tBall = ballHandler,\n\tBlock = blockHandler,\n\tCylinder = cylinderHandler,\n\tAssetId = meshIdHandler,\n\tWedge = wedgeHandler,\n}\n\nreturn function(identifier)\n\tlocal handler = SHAPE_HANDLERS[identifier:GetShape()]\n\tif handler then\n\t\treturn handler(identifier)\n\tend\nend"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

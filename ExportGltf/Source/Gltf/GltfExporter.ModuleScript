@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "GltfExporter",
+ "referent": "RBX12970606e1274954ae0d43660a9165f9",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "GltfExporter"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{428017a8-ecbf-4f06-a2c9-e59cc3ff7646}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local SourceFolder = script.Parent.Parent\n\nlocal GltfScene = require(SourceFolder.Gltf.GltfScene)\nlocal GltfNode = require(SourceFolder.Gltf.GltfNode)\nlocal GltfMesh = require(SourceFolder.Gltf.GltfMesh)\nlocal GltfAccessor = require(SourceFolder.Gltf.GltfAccessor)\nlocal GltfBufferView = require(SourceFolder.Gltf.GltfBufferView)\nlocal GltfBuffer = require(SourceFolder.Gltf.GltfBuffer)\nlocal GltfMaterial = require(SourceFolder.Gltf.GltfMaterial)\nlocal GltfTexture = require(SourceFolder.Gltf.GltfTexture)\nlocal GltfImage = require(SourceFolder.Gltf.GltfImage)\nlocal GltfSampler = require(SourceFolder.Gltf.GltfSampler)\n\n\nlocal GetGltfMesh = require(SourceFolder.Gltf.Helpers.GetGltfMesh)\n\nlocal MeshIdentifier = require(SourceFolder.Gltf.Identifiers.MeshIdentifier)\nlocal MaterialIdentifier = require(SourceFolder.Gltf.Identifiers.MaterialIdentifier)\n\nlocal IndexedLookup = require(SourceFolder.Utilities.IndexedLookup)\n\nlocal HttpService = game:GetService(\"HttpService\")\n\nlocal GltfExporter = {}\nGltfExporter.__index = GltfExporter\nGltfExporter.__objectType = \"GltfExporer\"\n\nlocal EXPORT_TYPES = {\n\tscenes = {containedType = GltfScene},\n\tnodes = {containedType = GltfNode},\n\tmeshes = {containedType = GltfMesh},\n\taccessors = {containedType = GltfAccessor},\n\tbufferViews = {containedType = GltfBufferView},\n\tbuffers = {containedType = GltfBuffer},\n\tmaterials = {containedType = GltfMaterial},\n\ttextures = {containedType = GltfTexture},\n\timages = {containedType = GltfImage},\n\tsamplers = {containedType = GltfSampler},\n}\n\nfunction GltfExporter.new()\n\tlocal self = setmetatable({\n\t\t_exportIndex = {},\n\t\t_exportOrder = {},\n\t\t_nodeInstanceLookup = {},\n\t\t_caches = {\n\t\t\tmeshLoaded = {}, -- {MeshString : true}\n\t\t\taccessorLookup = {}, -- {AccessorString : Accessor}\n\t\t\tmeshLookup = {}, -- {MeshString : Mesh}\n\t\t\tmaterialLookup = {}, -- {MaterialString : Material}\n\t\t\ttextureLookup = {}, -- {TextureString : Texture}\n\t\t\tsamplerLookup = {}, -- {SamplerString : Sampler}\n\t\t}\n\t}, GltfExporter)\n\t\n\tfor exportType, data in EXPORT_TYPES do\n\t\tself[exportType] = {}\n\tend\n\t\n\treturn self\nend\n\nfunction GltfExporter:populateScene(name, root)\n\tlocal newScene = GltfScene.new()\n\tnewScene:SetExporter(self)\n\tnewScene:SetName(name)\n\t\n\tlocal rootNode = self:MakeNodeFromInstance(root)\n\t\n\tnewScene:AddNode(rootNode)\n\tself.scenes[newScene] = true\nend\n\nlocal function getCFrame(instance : Instance)\n\tif instance:IsA(\"BasePart\") then\n\t\treturn instance.CFrame\n\telseif instance:IsA(\"PVInstance\") then\n\t\tinstance:GetPivot()\n\telseif instance.Parent ~= nil then\n\t\treturn getCFrame(instance.Parent)\n\tend\n\treturn CFrame.identity\nend\n\nlocal function getSize(instance : Instance)\n\tif instance:IsA(\"BasePart\") then\n\t\treturn instance.Size\n\tend\n\treturn Vector3.one\nend\n\nfunction GltfExporter:MakeNodeFromInstance(instance, nodeParent)\n\tlocal scale = getSize(instance)\n\t\n\tlocal newNode = GltfNode.new()\n\tnewNode:SetExporter(self)\n\tnewNode:SetName(instance.Name)\n\tnewNode:SetCFrame(getCFrame(instance))\n\tnewNode:SetScale(scale)\n\tnewNode:SetParent(nodeParent)\n\t\n\tlocal children = instance:GetChildren()\n\t\n\tlocal meshIdentifier = MeshIdentifier.new(instance)\n\tif meshIdentifier:GetString() then\n\t\tlocal materialIdentifier = MaterialIdentifier.new(instance)\n\t\t\n\t\tnewNode:SetMesh(GetGltfMesh(self, meshIdentifier, materialIdentifier))\n\telse\n\t\tif #children == 0 then\n\t\t\treturn\n\t\tend\n\tend\n\t\n\t\n\tself.nodes[newNode] = true\n\tself._nodeInstanceLookup[instance] = newNode\n\t\n\tfor _, child in children do\n\t\tlocal childNode = self:MakeNodeFromInstance(child, newNode)\n\t\tnewNode:AddChild(childNode)\n\tend\n\t\n\treturn newNode\nend\n\nfunction GltfExporter:GetObjectIndex(object)\n\tlocal index = self._exportIndex[object]\n\tif index == nil then\n\t\tif not next(self._exportIndex) then\n\t\t\terror(\"Index for object not found, getObjectIndex may have been called before export.exportIndex was populated\")\n\t\tend\n\t\terror(\"Index for object not found\")\n\tend\n\treturn index\nend\n\nfunction GltfExporter:WriteToJson()\n\tself._exportIndex = {}\n\tself._exportOrder = {}\n\t\n\t-- Pre populate indexes so that they can be referenced in the json before they are populated\n\tfor exportType, _ in EXPORT_TYPES do\n\t\tlocal objects = {}\n\t\tfor object, _ in self[exportType] do\n\t\t\ttable.insert(objects, object)\n\t\t\tself._exportIndex[object] = #objects - 1 -- json/gltf is 0 indexed\n\t\tend\n\t\tself._exportOrder[exportType] = objects\n\tend\n\t\n\tlocal jsonData = {}\n\tjsonData.scene = 0\n\tjsonData.asset = {\n\t\tgenerator = \"Roblox Luau Export\",\n\t\tversion = \"2.0\",\n\t}\n\t\n\tfor exportType, objects in self._exportOrder do\n\t\tlocal exportData = {}\n\t\tfor index, object in objects do\n\t\t\ttable.insert(exportData, object:ToJsonData())\n\t\tend\n\t\tjsonData[exportType] = exportData\n\tend\n\t\n\treturn HttpService:JSONEncode(jsonData)\nend\n\nfunction GltfExporter:Destroy()\n\tself._caches = {}\nend\n\nreturn GltfExporter"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

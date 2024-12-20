@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "GetDirectionFromFace",
+ "referent": "RBX7eca12c229c24606867e0e67cdf0163a",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "GetDirectionFromFace"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{49f88f00-8e8a-4c48-9648-0b0d9cdb3d09}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local DIRECTION_LOOKUP = {\n\tVector3.xAxis,\n\tVector3.yAxis,\n\tVector3.zAxis\n}\n\nreturn function(faceIndex)\n\treturn DIRECTION_LOOKUP[(faceIndex - 1) % 3 + 1]\nend"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

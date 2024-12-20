@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "ApplyMatrixToMesh",
+ "referent": "RBXb3b0f4281cc0476a9108026c2b7f64f8",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "ApplyMatrixToMesh"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{353fc7fa-24d7-4076-b639-f03958d74e20}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "return function(mesh, matrix)\n\tlocal normalMatrix = matrix:inverse():transpose()\n\t\n\tfor index, position in mesh._positions do\n\t\tmesh._positions[index] = matrix * position\n\tend\n\t\n\tfor index, normal in mesh._normals do\n\t\tmesh._normals[index] = (normalMatrix * normal).Unit\n\tend\n\t\n\tmesh:RecalculateBounds()\nend"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

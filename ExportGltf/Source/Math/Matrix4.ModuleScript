@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "Matrix4",
+ "referent": "RBXd8c34cd24132473b9bca205bb083763c",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "Matrix4"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{4620cbd3-c5a4-4d3d-b6fd-dcda10e4786b}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local SourceFolder = script.Parent.Parent\n\nlocal GetObjectType = require(SourceFolder.Utilities.GetObjectType)\nlocal Vector4 = require(SourceFolder.Math.Vector4)\n\nlocal Matrix4 = {}\nMatrix4.__index = Matrix4\nMatrix4.__objectType = \"Matrix4\"\n\nlocal function makeIdentityElt()\n\treturn {\n\t\t{1, 0, 0, 0},\n\t\t{0, 1, 0, 0},\n\t\t{0, 0, 1, 0},\n\t\t{0, 0, 0, 1}\n\t}\nend\n\nlocal function makeZeroElt()\n\treturn {\n\t\t{0, 0, 0, 0},\n\t\t{0, 0, 0, 0},\n\t\t{0, 0, 0, 0},\n\t\t{0, 0, 0, 0}\n\t}\nend\n\nfunction Matrix4.new(elt)\n\tlocal self = setmetatable({\n\t\telt = if elt then elt else makeIdentityElt(),\n\t}, Matrix4)\n\treturn self\nend\n\nfunction Matrix4:getValue(x : number, y : number) : number\n\treturn self.elt[x][y]\nend\n\nfunction Matrix4.fromAxisAngle(axis : Vector3, angle : number)\n\tlocal elt = makeIdentityElt()\n\n\tlocal unitAxis : Vector3 = axis.Unit\n\n\tlocal cos         : number = math.cos(angle)\n\tlocal sin         : number = math.sin(angle)\n\tlocal oneMinusCos : number = 1 - cos\n\n\tlocal x2   : number = unitAxis.X * unitAxis.X\n\tlocal y2   : number = unitAxis.Y * unitAxis.Y\n\tlocal z2   : number = unitAxis.Z * unitAxis.Z\n\tlocal xym  : number = unitAxis.X * unitAxis.Y * oneMinusCos\n\tlocal xzm  : number = unitAxis.X * unitAxis.Z * oneMinusCos\n\tlocal yzm  : number = unitAxis.Y * unitAxis.Z * oneMinusCos\n\tlocal xSin : number = unitAxis.X * sin\n\tlocal ySin : number = unitAxis.Y * sin\n\tlocal zSin : number = unitAxis.Z * sin\n\n\telt[1][1] = x2 * oneMinusCos + cos\n\telt[1][2] = xym - zSin\n\telt[1][3] = xzm + ySin\n\n\telt[2][1] = xym + zSin\n\telt[2][2] = y2 * oneMinusCos + cos\n\telt[2][3] = yzm - xSin\n\n\telt[3][1] = xzm - ySin\n\telt[3][2] = yzm + xSin\n\telt[3][3] = z2 * oneMinusCos + cos\n\n\treturn Matrix4.new(elt)\nend\n\nfunction Matrix4.fromScale(x : number, y : number, z : number)\n\tlocal elt = makeIdentityElt()\n\t\n\telt[1][1] = x\n\telt[2][2] = y\n\telt[3][3] = z\n\t\n\treturn Matrix4.new(elt)\nend\n\nfunction Matrix4.fromVectorScale(scale : Vector3)\n\treturn Matrix4.fromScale(scale.X, scale.Y, scale.Z)\nend\n\nfunction Matrix4.fromTranslation(x : number, y : number, z : number)\n\tlocal elt = makeIdentityElt()\n\t\n\telt[1][4] = x\n\telt[2][4] = y\n\telt[3][4] = z\n\t\n\treturn Matrix4.new(elt)\nend\n\nfunction Matrix4.fromVectorTranslation(translation : Vector3)\n\treturn Matrix4.fromTranslation(translation.X, translation.Y, translation.Z)\nend\n\nfunction Matrix4.fromCFrame(cframe)\n\tlocal elt = makeIdentityElt()\n\t\n\t-- Set position\n\tlocal position = cframe.Position\n\telt[4][1] = position.x\n\telt[4][2] = position.y\n\telt[4][3] = position.z\n\t\n\t-- Set xVector\n\tlocal xVector = cframe.RightVector\n\telt[1][1] = xVector.X\n\telt[2][1] = xVector.Y\n\telt[3][1] = xVector.Z\n\t\n\t-- Set yVector\n\tlocal yVector = cframe.UpVector\n\telt[1][2] = yVector.X\n\telt[2][2] = yVector.Y\n\telt[3][2] = yVector.Z\n\t\n\t-- Set zVector\n\tlocal zVector = -cframe.LookVector\n\telt[1][3] = zVector.X\n\telt[2][3] = zVector.Y\n\telt[3][3] = zVector.Z\n\t\n\treturn Matrix4.new(elt)\nend\n\nfunction Matrix4.addMatrix(a, b)\n\tlocal elt = makeIdentityElt()\n\t\n\tfor x : number = 1, 4 do\n\t\tfor y : number = 1, 4 do\n\t\t\telt[x][y] = a[x][y] + b[x][y]\n\t\tend\n\tend\n\t\n\treturn Matrix4.new(elt)\nend\n\nfunction Matrix4.__add(a, b)\n\tif b.__index ~= Matrix4.__index then\n\t\terror(\"attempt to perform arithmetic (add) on Matrix4 and non Matrix4 value\")\n\tend\n\treturn Matrix4.addMatrix(a, b)\nend\n\nfunction Matrix4.subtractMatrix(a, b)\n\tlocal elt = makeIdentityElt()\n\n\tfor x : number = 1, 4 do\n\t\tfor y : number = 1, 4 do\n\t\t\telt[x][y] = a.elt[x][y] - b.elt[x][y]\n\t\tend\n\tend\n\n\treturn Matrix4.new(elt)\nend\n\nfunction Matrix4.__sub(a, b)\n\tif b.__index ~= Matrix4.__index then\n\t\terror(\"attempt to perform arithmetic (sub) on Matrix4 and non Matrix4 value\")\n\tend\n\treturn Matrix4.subtractMatrix(a, b)\nend\n\nfunction Matrix4.multiplyMatrix(a, b)\n\tlocal elt = makeZeroElt()\n\n\tfor x : number = 1, 4 do\n\t\tfor y : number = 1, 4 do\n\t\t\tfor i : number = 1, 4 do\n\t\t\t\telt[x][y] += a.elt[x][i] * b.elt[i][y]\n\t\t\tend\n\t\tend\n\tend\n\n\treturn Matrix4.new(elt)\nend\n\nfunction Matrix4.multiplyNumber(a, b)\n\tlocal elt = makeIdentityElt()\n\n\tfor x : number = 1, 4 do\n\t\tfor y : number = 1, 4 do\n\t\t\telt[x][y] = a.elt[x][y] * b\n\t\tend\n\tend\n\n\treturn Matrix4.new(elt)\nend\n\nfunction Matrix4.multiplyVector4(a, b)\n\tlocal vectorValues = {b.x, b.y, b.z, b.w}\n\tlocal values = {0, 0, 0, 0}\n\n\tfor x : number = 1, 4 do\n\t\tfor y : number = 1, 4 do\n\t\t\tvalues[x] += a.elt[x][y] * vectorValues[y]\n\t\tend\n\tend\n\n\treturn Vector4.new(table.unpack(values))\nend\n\nfunction Matrix4.multiplyVector3(a, b)\n\treturn Matrix4.multiplyVector4(a, Vector4.fromVector3(b)):toVector3()\nend\n\n\nlocal MATRIX_MULTIPLICATION_HANDLERS = {\n\tnumber = Matrix4.multiplyNumber,\n\tVector3 = Matrix4.multiplyVector3,\n\tVector4 = Matrix4.multiplyVector4,\n\tMatrix4 = Matrix4.multiplyMatrix,\n}\n\nfunction Matrix4.__mul(a, b)\n\tlocal bType = GetObjectType(b)\n\t\n\tif MATRIX_MULTIPLICATION_HANDLERS[bType] == nil then\n\t\terror(\"attempt to perform arithmetic (mul) on Matrix4 and \" .. bType)\n\tend\n\t\n\treturn MATRIX_MULTIPLICATION_HANDLERS[bType](a, b)\nend\n\nfunction Matrix4:row(x : number) \n\tlocal values = {0, 0, 0, 0}\n\t\n\tfor y : number = 1, 4 do\n\t\tvalues[y] = self.elt[x][y]\n\tend\n\t\n\treturn Vector4.new(table.unpack(values))\nend\n\nfunction Matrix4:colum(y : number)\n\tlocal values = {}\n\t\n\tfor x : number = 1, 4 do\n\t\tvalues[x] = self.elt[x][y]\n\tend\n\t\n\treturn Vector4.new(table.unpack(values))\nend\n\nfunction Matrix4:transpose()\n\tlocal elt = {}\n\tfor x : number = 1, 4 do\n\t\telt[x] = {}\n\t\tfor y : number = 1, 4 do\n\t\t\telt[x][y] = self.elt[y][x]\n\t\tend\n\tend\n\treturn Matrix4.new(elt)\nend\n\nfunction Matrix4:subDeterminant(excludeX : number, excludeY : number) : number\n\tlocal row = {0, 0, 0}\n\tlocal col = {0, 0, 0}\n\n\tfor i = 1, 3 do\n\t\trow[i] = i\n\t\tcol[i] = i\n\n\t\tif i >= excludeX then\n\t\t\trow[i] += 1\n\t\tend\n\t\t\n\t\tif i >= excludeY then\n\t\t\tcol[i] += 1\n\t\tend\n\tend\n\n\tlocal cofactor11 : number = self.elt[row[2]][col[2]] * self.elt[row[3]][col[3]] - self.elt[row[2]][col[3]] * self.elt[row[3]][col[2]]\n\n\tlocal cofactor21 : number = self.elt[row[2]][col[3]] * self.elt[row[3]][col[1]] - self.elt[row[2]][col[1]] * self.elt[row[3]][col[3]]\n\n\tlocal cofactor31 : number = self.elt[row[2]][col[1]] * self.elt[row[3]][col[2]] - self.elt[row[2]][col[2]] * self.elt[row[3]][col[1]]\n\n\t-- Product of the first row and the cofactors along the first row\n\treturn self.elt[row[1]][col[1]] * cofactor11 + self.elt[row[1]][col[2]] * cofactor21 + self.elt[row[1]][col[3]] * cofactor31\nend\n\nfunction Matrix4:cofactor() \n\tlocal elt = {}\n\t\n\t-- i is used to incrementally compute -1 ^ (r+c)\n\tlocal i = 1\n\t\n\tfor x : number = 1, 4 do\n\t\telt[x] = {}\n\t\tfor y : number = 1, 4 do\n\t\t\tlocal det = self:subDeterminant(x, y)\n\t\t\telt[x][y] = i * det\n\t\t\ti = -i\n\t\tend\n\t\ti = -i\n\tend\n\t\n\treturn Matrix4.new(elt)\nend\n\nfunction Matrix4:adjoint() \n\treturn self:cofactor():transpose()\nend\n\nfunction Matrix4:inverse()\n\tlocal adjointMatrix = self:adjoint()\n\t\n\tlocal determinant = adjointMatrix:colum(1):dot(self:row(1))\n\t\n\treturn adjointMatrix * (1 / determinant)\nend\n\nreturn Matrix4\n"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

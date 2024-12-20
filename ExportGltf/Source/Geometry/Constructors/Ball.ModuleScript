@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "Ball",
+ "referent": "RBXc391d88645044d25b004481f00169240",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "Ball"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{fc51c2ba-2bc8-4e6c-a035-507997fadd16}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local SourceFolder = script.Parent.Parent.Parent\n\nlocal Mesh = require(SourceFolder.Geometry.Mesh)\n\nlocal GetDirectionFromFace = require(SourceFolder.Geometry.Constructors.Helpers.GetDirectionFromFace)\nlocal GetSignedDirectionFromFace = require(SourceFolder.Geometry.Constructors.Helpers.GetSignedDirectionFromFace)\nlocal CreateMeshVertex = require(SourceFolder.Geometry.Constructors.Helpers.CreateMeshVertex)\n\nreturn function (color : Color3)\n\tlocal ball = Mesh.new()\n\n\tlocal segmentsPerFace = 6\n\tlocal vertsPerFace = segmentsPerFace + 1\n\n\tfor  face = 1, 6 do\n\t\tlocal direction = if face > 3 then -1 else 1\n\t\tlocal up = GetDirectionFromFace(face) * direction\n\t\tlocal forward = GetDirectionFromFace(face + 1) * direction\n\t\tlocal right = GetDirectionFromFace(face + 2)\n\t\tlocal verticies = {}\n\n\t\t-- Create verticies\n\t\tfor u = 0, vertsPerFace - 1 do\n\t\t\tfor v = 0, vertsPerFace - 1 do\n\t\t\t\tlocal offsetU = (u / segmentsPerFace) * 2 - 1\n\t\t\t\tlocal offsetV = (v / segmentsPerFace) * 2 - 1\n\t\t\t\tlocal vertexNormal = (up + forward * offsetU + right * offsetV).Unit\n\t\t\t\ttable.insert(verticies, CreateMeshVertex(ball, vertexNormal / 2, vertexNormal, Vector2.new(u, v) / segmentsPerFace, color))\n\t\t\tend\n\t\tend\n\n\t\t-- Create triangles\n\t\tfor u = 0, segmentsPerFace - 1 do\n\t\t\tfor v = 0, segmentsPerFace - 1 do\n\t\t\t\tlocal index0 =  verticies[u + v * vertsPerFace + 1]\n\t\t\t\tlocal index1 = verticies[(u + 1) + v * vertsPerFace + 1]\n\t\t\t\tlocal index2 = verticies[(u + 1) + (v + 1) * vertsPerFace + 1]\n\t\t\t\tlocal index3 =  verticies[u + (v + 1) * vertsPerFace + 1]\n\n\t\t\t\tball:AddTriangle(index0, index1, index2)\n\t\t\t\tball:AddTriangle(index2, index3, index0)\n\t\t\tend\n\t\tend\n\tend\n\n\treturn ball\nend"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

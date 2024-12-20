@@ -1,0 +1,72 @@
+{
+ "className": "Script",
+ "name": "Plugin",
+ "referent": "RBX79b4b64ce39d4b0db9cf51561312b9d8",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "Disabled": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "Plugin"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{65143681-5a93-4384-afca-009437f6eed3}"
+   }
+  },
+  "RunContext": {
+   "_propertyType": "token",
+   "values": {
+    "_": "0"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local GltfExporter = require(script.Parent.Source.Gltf.GltfExporter)\n\nlocal HttpService = game:GetService(\"HttpService\")\n\nlocal CHUNK_LENGTH = 20000\nlocal SERVER_ADDRESS = \"http://localhost:8080\"\n\nlocal function exportWorkspace()\n\tprint(\"Exporting Workspace...\")\n\tlocal exporter = GltfExporter.new()\n\texporter:populateScene(\"Workspace\", game.Workspace)\n\t\n\tlocal result = exporter:WriteToJson()\n\t\n\tlocal chunkCount = math.ceil(string.len(result) / CHUNK_LENGTH)\n\tprint(chunkCount)\n\t\n\tfor i = 1, chunkCount do\n\t\tlocal chunk = string.sub(result, (i - 1) * CHUNK_LENGTH + 1, i * CHUNK_LENGTH)\n\t\tHttpService:PostAsync(SERVER_ADDRESS, chunk, Enum.HttpContentType.TextPlain, false, {chunkType = \"content\"})\n\tend\n\t\n\tHttpService:PostAsync(SERVER_ADDRESS, \"n/a\", Enum.HttpContentType.TextPlain, false, {chunkType = \"complete\"})\n\t\n\texporter:Destroy()\n\t\n\tprint(\"Done\")\nend\n\nlocal toolbar = plugin:CreateToolbar(\"Export\")\nlocal button = toolbar:CreateButton(\"Export To glTF\", \"Exports your scene to a script file in game.ServerStorage\", \"\")\n\nbutton.Click:Connect(exportWorkspace)"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

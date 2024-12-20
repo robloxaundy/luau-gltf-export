@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "Vertex",
+ "referent": "RBX3f4715633f2e40c2887604c62c416164",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "Vertex"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{3253128d-949d-4d7e-85f8-b868352ba3e4}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local Vertex = {}\nVertex.__index = Vertex\nVertex.__objectType = \"Vertex\"\n\nVertex.indexLookups = {\n\tPOSITION_INDEX = 1,\n\tNORMAL_INDEX = 2,\n\tUV_INDEX = 3,\n\tVERTEX_COLOR_INDEX = 4\n}\n\nfunction Vertex.new(positionIndex, normalIndex, uvIndex, vertexColorIndex)\n\tlocal self = setmetatable({\n\t\tpositionIndex,\n\t\tnormalIndex or -1,\n\t\tuvIndex or -1,\n\t\tvertexColorIndex or -1\n\t}, Vertex)\n\t\n\treturn self\nend\n\nfunction Vertex:getValue(valueType)\n\treturn self[valueType]\nend\n\nfunction Vertex:hasNormal()\n\treturn self[Vertex.indexLookups.NORMAL_INDEX] ~= -1\nend\n\nfunction Vertex:hasUv()\n\treturn self[Vertex.indexLookups.UV_INDEX] ~= -1\nend\n\nfunction Vertex:hasVertexColor()\n\treturn self[Vertex.indexLookups.VERTEX_COLOR_INDEX] ~= -1\nend\n\nreturn Vertex"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

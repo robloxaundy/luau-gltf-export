@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "AddCubeFace",
+ "referent": "RBXb83ad76b21ab43ad800ff187cc23da70",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "AddCubeFace"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{4f102a53-89c9-4e96-9aff-c1f46de85bef}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local SourceFolder = script.Parent.Parent.Parent.Parent\n\nlocal GetDirectionFromFace = require(SourceFolder.Geometry.Constructors.Helpers.GetDirectionFromFace)\nlocal CreateMeshVertex = require(SourceFolder.Geometry.Constructors.Helpers.CreateMeshVertex)\nlocal CreateQuad = require(SourceFolder.Geometry.Constructors.Helpers.CreateQuad)\n\nreturn function (mesh, faceIndex : number, color : Color3)\n\tlocal orientation = if faceIndex > 3 then -1 else 1\n\t\n\tlocal normal = GetDirectionFromFace(faceIndex) * orientation\n\tlocal halfNormal = normal * 0.5\n\tlocal forward = GetDirectionFromFace(faceIndex + 1) * orientation * 0.5\n\tlocal right = GetDirectionFromFace(faceIndex + 2) * 0.5\n\n\tlocal p1 = CreateMeshVertex(mesh, halfNormal + forward + right, normal, Vector2.new(0, 0), color)\n\tlocal p2 = CreateMeshVertex(mesh, halfNormal - forward + right, normal, Vector2.new(1, 0), color)\n\tlocal p3 = CreateMeshVertex(mesh, halfNormal - forward - right, normal, Vector2.new(1, 1), color)\n\tlocal p4 = CreateMeshVertex(mesh, halfNormal + forward - right, normal, Vector2.new(0, 1), color)\n\n\tCreateQuad(mesh, p1, p2, p3, p4)\nend"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

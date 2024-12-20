@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "CreateMeshVertex",
+ "referent": "RBX375a46d43d2f4aa9a821e1c70df82241",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "CreateMeshVertex"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{a35450a1-80f9-4ab0-9d12-70df48f5df14}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local SourceFolder = script.Parent.Parent.Parent.Parent\n\nlocal Vertex = require(SourceFolder.Geometry.Vertex)\n\nreturn function(mesh, position, normal, uv, color)\n\tlocal positionIndex = mesh:AddPosition(position)\n\tlocal normalIndex = mesh:AddNormal(normal)\n\tlocal uvIndex = mesh:AddUV(uv)\n\tlocal colorIndex = mesh:AddVertexColor(color)\n\t\n\treturn mesh:AddVertex(Vertex.new(positionIndex, normalIndex, uvIndex, colorIndex))\nend"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

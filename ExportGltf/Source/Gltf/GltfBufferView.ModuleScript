@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "GltfBufferView",
+ "referent": "RBXa0e0524d95c84642b506c9a4e7adb8df",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "GltfBufferView"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{a50bf519-84d8-429f-8ac4-ecacc1583569}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local SourceFolder = script.Parent.Parent\n\nlocal TargetEnum = require(SourceFolder.Gltf.Helpers.TargetEnum)\n\nlocal GltfBufferView = {}\nGltfBufferView.__index = GltfBufferView\nGltfBufferView.__objectType = \"GltfBufferView\"\n\nfunction GltfBufferView.new()\n\tlocal self = setmetatable({\n\t\t_exporter = nil,\n\t\t_name = nil,\n\t\t_byteLength = 0,\n\t\t_buffer = nil,\n\t\t_target = TargetEnum.ArrayBuffer\n\t}, GltfBufferView)\n\n\treturn self\nend\n\nfunction GltfBufferView:SetExporter(exporter)\n\tself._exporter = exporter\nend\n\nfunction GltfBufferView:SetName(name)\n\tself._name = name\nend\n\nfunction GltfBufferView:SetTarget(target)\n\tself._target = target\nend\n\nfunction GltfBufferView:SetBuffer(bufferObject)\n\tself._buffer = bufferObject\nend\n\nfunction GltfBufferView:SetByteLength(byteLength)\n\tself._byteLength = byteLength\nend\n\nfunction GltfBufferView:ToJsonData()\n\tlocal jsonData = {\n\t\tname = self._name,\n\t\tbyteLength = self._byteLength,\n\t\tbuffer = self._exporter:GetObjectIndex(self._buffer),\n\t\ttarget = self._target\n\t}\n\n\treturn jsonData\nend\n\nfunction GltfBufferView:Destroy()\n\tself._exporter = nil\nend\n\nreturn GltfBufferView"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

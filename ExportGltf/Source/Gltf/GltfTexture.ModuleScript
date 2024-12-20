@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "GltfTexture",
+ "referent": "RBX1df92474268e4773af0e4a2f34b007b5",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "GltfTexture"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{30a91bac-348e-4c61-8caa-ab7672189564}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local GltfTexture = {}\nGltfTexture.__index = GltfTexture\nGltfTexture.__objectType = \"GltfTexture\"\n\nfunction GltfTexture.new()\n\tlocal self = setmetatable({\n\t\t_exporter = nil,\n\t\t_sampler = nil,\n\t\t_source = nil,\n\t}, GltfTexture)\n\n\treturn self\nend\n\nfunction GltfTexture:SetExporter(exporter)\n\tself._exporter = exporter\nend\n\nfunction GltfTexture:SetSampler(sampler)\n\tself._sampler = sampler\nend\n\nfunction GltfTexture:SetSource(source)\n\tself._source = source\nend\n\nfunction GltfTexture:ToJsonData()\n\tlocal jsonData = {\n\t\tsampler = self._exporter:GetObjectIndex(self._sampler),\n\t\tsource = self._exporter:GetObjectIndex(self._source),\n\t}\n\n\treturn jsonData\nend\n\nfunction GltfTexture:Destroy()\n\tself._exporter = nil\n\tself._sampler = nil\n\tself._source = nil\nend\n\nreturn GltfTexture"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

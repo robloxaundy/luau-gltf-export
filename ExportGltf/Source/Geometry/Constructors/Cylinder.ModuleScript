@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "Cylinder",
+ "referent": "RBXb791a36e534346bcb340c87994991e8d",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "Cylinder"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{3fcc6ce4-060b-41b1-9975-76779079fe6c}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local SourceFolder = script.Parent.Parent.Parent\n\nlocal Mesh = require(SourceFolder.Geometry.Mesh)\n\nlocal GetDirectionFromFace = require(SourceFolder.Geometry.Constructors.Helpers.GetDirectionFromFace)\nlocal GetSignedDirectionFromFace = require(SourceFolder.Geometry.Constructors.Helpers.GetSignedDirectionFromFace)\nlocal CreateMeshVertex = require(SourceFolder.Geometry.Constructors.Helpers.CreateMeshVertex)\n\nreturn function (color : Color3)\n\tlocal cylinder = Mesh.new()\n\n\tlocal segmentsPerFace = 6\n\tlocal vertsPerFace = segmentsPerFace + 1\n\n\tlocal roundedFaces = {3, 2, 6, 5}\n\n\tlocal right = Vector3.xAxis\n\n\t--Make curved sides\n\tfor faceIndex = 1, 4 do\n\t\tlocal forwardFace = roundedFaces[faceIndex]\n\t\tlocal upFace = roundedFaces[(faceIndex % 4) + 1]\n\n\t\tlocal forward = GetSignedDirectionFromFace(forwardFace)\n\t\tlocal up = GetSignedDirectionFromFace(upFace)\n\t\t\n\t\tlocal verticies = {}\n\n\t\tfor direction = -1, 1, 2 do\n\t\t\tlocal side = (direction + 1) / 2\n\t\t\tfor u = 0, vertsPerFace - 1 do\n\t\t\t\tlocal offsetU = (u / segmentsPerFace) * 2 - 1\n\n\t\t\t\tlocal vertexNormal = (forward + up * offsetU).Unit\n\t\t\t\ttable.insert(verticies, CreateMeshVertex(cylinder, (right / 2) * direction + vertexNormal / 2, vertexNormal, Vector2.new(side, u / segmentsPerFace), color))\n\t\t\tend\n\t\tend\n\n\t\tfor index = 1, segmentsPerFace do\n\t\t\tlocal index0 = verticies[index]\n\t\t\tlocal index1 = verticies[index + vertsPerFace]\n\t\t\tlocal index2 = verticies[index + 1 + vertsPerFace]\n\t\t\tlocal index3 = verticies[index + 1]\n\n\t\t\tcylinder:AddTriangle(index0, index1, index2)\n\t\t\tcylinder:AddTriangle(index2, index3, index0)\n\t\tend\n\tend\n\n\t-- Make end caps\n\tfor direction = -1, 1, 2 do\n\t\tlocal side = (direction + 1) / 2\n\t\tlocal normal = right * direction\n\n\t\t-- Add center vertex\n\t\tlocal centerIndex = CreateMeshVertex(cylinder, normal / 2, normal, Vector2.new(0.5, 0.5), color)\n\n\t\t-- Add each sides verticies and triangles\n\t\tfor faceIndex = 1, 4 do\n\t\t\tlocal forwardFace = roundedFaces[faceIndex]\n\t\t\tlocal upFace = roundedFaces[(faceIndex % 4) + 1]\n\n\t\t\tlocal forward = GetSignedDirectionFromFace(forwardFace)\n\t\t\tlocal up = GetSignedDirectionFromFace(upFace)\n\t\t\t\n\t\t\tlocal verticies = {}\n\n\n\t\t\tfor u = 0, vertsPerFace - 1 do\n\t\t\t\tlocal offsetU = (u / segmentsPerFace) * 2 - 1\n\t\t\t\tlocal vertexPosition = (forward + up * offsetU).Unit / 2\n\t\t\t\t\n\t\t\t\ttable.insert(verticies, CreateMeshVertex(cylinder, normal / 2 + vertexPosition, normal, Vector2.new(0.5 + vertexPosition.z, 0.5 + vertexPosition.y), color))\n\t\t\tend\n\n\t\t\tfor index = 1, segmentsPerFace do\n\t\t\t\tlocal index0 = verticies[index + side]\n\t\t\t\tlocal index1 = verticies[index + (1 - side)]\n\t\t\t\tcylinder:AddTriangle(centerIndex, index0,  index1)\n\t\t\tend\n\t\tend\n\tend\n\n\treturn cylinder\nend"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

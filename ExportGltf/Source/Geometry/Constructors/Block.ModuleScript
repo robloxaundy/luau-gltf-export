@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "Block",
+ "referent": "RBXdb3d788d9fed476db1e8aeec9324ab16",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "Block"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{f1c77896-810d-40b1-b3cd-3643face5b0c}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local SourceFolder = script.Parent.Parent.Parent\n\nlocal Mesh = require(SourceFolder.Geometry.Mesh)\n\nlocal AddCubeFace = require(SourceFolder.Geometry.Constructors.Helpers.AddCubeFace)\n\nreturn function (color : Color3)\n\tlocal Block = Mesh.new()\n\n\tfor i = 1, 6 do\n\t\tAddCubeFace(Block, i, color)\n\tend\n\n\treturn Block\nend"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "MaterialIdentifier",
+ "referent": "RBX832dad805511499c88528a4bc7065c33",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "MaterialIdentifier"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{fb8828ee-7ed3-4049-a0ae-9697e0a9dcf6}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "--[[\n\tMaterialIdentifier is used for loading metadata and deduplication\n\tthe idea is that for any two given instances, if their MaterialIdentifier._string is the same then the share the same material\n]]\n\nlocal SourceFolder = script.Parent.Parent.Parent\n\nlocal RemoveNils = require(SourceFolder.Utilities.RemoveNils)\n\nlocal MaterialIdentifier = {}\nMaterialIdentifier.__index = MaterialIdentifier\nMaterialIdentifier.__objectType = \"MaterialIdentifier\"\n\nfunction MaterialIdentifier.new(instance)\n\tlocal self = setmetatable({\n\t\t_instance = instance,\n\t\t_string = nil,\n\t\t_doubleSided = nil,\n\t\t_color = nil,\n\t\t_diffuseId = nil,\n\t\t_normalId = nil,\n\t\t_metalnessId = nil,\n\t\t_roughnessId = nil,\n\t\t_alphaMode = nil,\n\t\t_transparency = 0,\n\t}, MaterialIdentifier)\n\n\tself:_generate()\n\n\treturn self\nend\n\nlocal function assetIdOrNil(value)\n\treturn if string.len(value) > 0 then value else nil\nend\n\nlocal function stringOrNil(resultString, value)\n\tif value then\n\t\treturn resultString\n\tend\nend\n\nlocal ALPHA_MODE_STRING = {\n\t[Enum.AlphaMode.Transparency] = \"Transparency\",\n\t[Enum.AlphaMode.Overlay] = \"Overlay\"\n}\n\nfunction MaterialIdentifier:_generateForSurfaceAppearance(surfaceAppearance : SurfaceAppearance)\n\tself._diffuseId = assetIdOrNil(surfaceAppearance.ColorMap)\n\tself._normalId = assetIdOrNil(surfaceAppearance.NormalMap)\n\tself._metalnessId = assetIdOrNil(surfaceAppearance.MetalnessMap)\n\tself._roughnessId = assetIdOrNil(surfaceAppearance.RoughnessMap)\n\tself._alphaMode = ALPHA_MODE_STRING[surfaceAppearance.AlphaMode]\nend\n\nfunction MaterialIdentifier:_generate()\n\tif self._instance:IsA(\"BasePart\") then\n\t\tlocal basePart : BasePart = self._instance\n\t\tself._color = basePart.Color\n\t\tself._transparency = basePart.Transparency\n\t\t\n\t\tif basePart:IsA(\"MeshPart\") then\n\t\t\tself._diffuseId = assetIdOrNil(basePart.TextureID)\n\t\t\tself._doubleSided = true\n\t\t\t\n\t\t\tlocal surfaceAppearance = basePart:FindFirstChildWhichIsA(\"SurfaceAppearance\", false)\n\t\t\tif surfaceAppearance then\n\t\t\t\tself:_generateForSurfaceAppearance(surfaceAppearance)\n\t\t\tend\n\t\tend\n\telseif self._instance:IsA(\"Decal\")  then\n\t\twarn(\"Decals not handled yet\")\n\t\treturn\n\telse\n\t\treturn\n\tend\n\t\n\tself._string = table.concat(RemoveNils({\n\t\tself:GetColorString(),\n\t\tstringOrNil(\"DoubleSided\", self._doubleSided),\n\t\tself._transparency,\n\t\tself._diffuseId,\n\t\tself._normalId,\n\t\tself._metalnessId,\n\t\tself._roughnessId,\n\t\tself._alphaMode\n\t}))\n\t\nend\n\n\nfunction MaterialIdentifier:GetString()\n\treturn self._string\nend\n\nfunction MaterialIdentifier:GetColorString()\n\tif not self._color then return nil end\n\treturn table.concat({\"{\", tostring(self._color), \"}\"})\nend\n\nfunction MaterialIdentifier:GetColor()\n\treturn self._color\nend\n\nfunction MaterialIdentifier:GetTransparency()\n\treturn self._transparency\nend\n\nfunction MaterialIdentifier:GetDiffuseId()\n\treturn self._diffuseId\nend\n\nfunction MaterialIdentifier:GetNormalId()\n\treturn self._normalId\nend\n\nfunction MaterialIdentifier:GetMetalnessId()\n\treturn self._metalnessId\nend\n\nfunction MaterialIdentifier:GetRoughnessId()\n\treturn self._roughnessId\nend\n\n\n\nfunction MaterialIdentifier:Destroy()\n\tself._instance = nil\nend\n\nreturn MaterialIdentifier"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

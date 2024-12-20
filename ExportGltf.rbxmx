@@ -1,0 +1,3590 @@
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
+	<Meta name="ExplicitAutoJoints">true</Meta>
+	<External>null</External>
+	<External>nil</External>
+	<Item class="Folder" referent="RBX6d11cca2b7f74f9fbf65bb8668d11ed6">
+		<Properties>
+			<BinaryString name="AttributesSerialize"></BinaryString>
+			<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+			<bool name="DefinesCapabilities">false</bool>
+			<string name="Name">ExportGltf</string>
+			<int64 name="SourceAssetId">-1</int64>
+			<BinaryString name="Tags"></BinaryString>
+		</Properties>
+		<Item class="Folder" referent="RBX3085d4e837784791bca0a8a48902e646">
+			<Properties>
+				<BinaryString name="AttributesSerialize"></BinaryString>
+				<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+				<bool name="DefinesCapabilities">false</bool>
+				<string name="Name">Source</string>
+				<int64 name="SourceAssetId">-1</int64>
+				<BinaryString name="Tags"></BinaryString>
+			</Properties>
+			<Item class="Folder" referent="RBX123c587687fa4d30b7b8f69ce842024d">
+				<Properties>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+					<bool name="DefinesCapabilities">false</bool>
+					<string name="Name">Math</string>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+				</Properties>
+				<Item class="ModuleScript" referent="RBXd8c34cd24132473b9bca205bb083763c">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<string name="Name">Matrix4</string>
+						<string name="ScriptGuid">{4620cbd3-c5a4-4d3d-b6fd-dcda10e4786b}</string>
+						<ProtectedString name="Source"><![CDATA[local SourceFolder = script.Parent.Parent
+
+local GetObjectType = require(SourceFolder.Utilities.GetObjectType)
+local Vector4 = require(SourceFolder.Math.Vector4)
+
+local Matrix4 = {}
+Matrix4.__index = Matrix4
+Matrix4.__objectType = "Matrix4"
+
+local function makeIdentityElt()
+	return {
+		{1, 0, 0, 0},
+		{0, 1, 0, 0},
+		{0, 0, 1, 0},
+		{0, 0, 0, 1}
+	}
+end
+
+local function makeZeroElt()
+	return {
+		{0, 0, 0, 0},
+		{0, 0, 0, 0},
+		{0, 0, 0, 0},
+		{0, 0, 0, 0}
+	}
+end
+
+function Matrix4.new(elt)
+	local self = setmetatable({
+		elt = if elt then elt else makeIdentityElt(),
+	}, Matrix4)
+	return self
+end
+
+function Matrix4:getValue(x : number, y : number) : number
+	return self.elt[x][y]
+end
+
+function Matrix4.fromAxisAngle(axis : Vector3, angle : number)
+	local elt = makeIdentityElt()
+
+	local unitAxis : Vector3 = axis.Unit
+
+	local cos         : number = math.cos(angle)
+	local sin         : number = math.sin(angle)
+	local oneMinusCos : number = 1 - cos
+
+	local x2   : number = unitAxis.X * unitAxis.X
+	local y2   : number = unitAxis.Y * unitAxis.Y
+	local z2   : number = unitAxis.Z * unitAxis.Z
+	local xym  : number = unitAxis.X * unitAxis.Y * oneMinusCos
+	local xzm  : number = unitAxis.X * unitAxis.Z * oneMinusCos
+	local yzm  : number = unitAxis.Y * unitAxis.Z * oneMinusCos
+	local xSin : number = unitAxis.X * sin
+	local ySin : number = unitAxis.Y * sin
+	local zSin : number = unitAxis.Z * sin
+
+	elt[1][1] = x2 * oneMinusCos + cos
+	elt[1][2] = xym - zSin
+	elt[1][3] = xzm + ySin
+
+	elt[2][1] = xym + zSin
+	elt[2][2] = y2 * oneMinusCos + cos
+	elt[2][3] = yzm - xSin
+
+	elt[3][1] = xzm - ySin
+	elt[3][2] = yzm + xSin
+	elt[3][3] = z2 * oneMinusCos + cos
+
+	return Matrix4.new(elt)
+end
+
+function Matrix4.fromScale(x : number, y : number, z : number)
+	local elt = makeIdentityElt()
+	
+	elt[1][1] = x
+	elt[2][2] = y
+	elt[3][3] = z
+	
+	return Matrix4.new(elt)
+end
+
+function Matrix4.fromVectorScale(scale : Vector3)
+	return Matrix4.fromScale(scale.X, scale.Y, scale.Z)
+end
+
+function Matrix4.fromTranslation(x : number, y : number, z : number)
+	local elt = makeIdentityElt()
+	
+	elt[1][4] = x
+	elt[2][4] = y
+	elt[3][4] = z
+	
+	return Matrix4.new(elt)
+end
+
+function Matrix4.fromVectorTranslation(translation : Vector3)
+	return Matrix4.fromTranslation(translation.X, translation.Y, translation.Z)
+end
+
+function Matrix4.fromCFrame(cframe)
+	local elt = makeIdentityElt()
+	
+	-- Set position
+	local position = cframe.Position
+	elt[4][1] = position.x
+	elt[4][2] = position.y
+	elt[4][3] = position.z
+	
+	-- Set xVector
+	local xVector = cframe.RightVector
+	elt[1][1] = xVector.X
+	elt[2][1] = xVector.Y
+	elt[3][1] = xVector.Z
+	
+	-- Set yVector
+	local yVector = cframe.UpVector
+	elt[1][2] = yVector.X
+	elt[2][2] = yVector.Y
+	elt[3][2] = yVector.Z
+	
+	-- Set zVector
+	local zVector = -cframe.LookVector
+	elt[1][3] = zVector.X
+	elt[2][3] = zVector.Y
+	elt[3][3] = zVector.Z
+	
+	return Matrix4.new(elt)
+end
+
+function Matrix4.addMatrix(a, b)
+	local elt = makeIdentityElt()
+	
+	for x : number = 1, 4 do
+		for y : number = 1, 4 do
+			elt[x][y] = a[x][y] + b[x][y]
+		end
+	end
+	
+	return Matrix4.new(elt)
+end
+
+function Matrix4.__add(a, b)
+	if b.__index ~= Matrix4.__index then
+		error("attempt to perform arithmetic (add) on Matrix4 and non Matrix4 value")
+	end
+	return Matrix4.addMatrix(a, b)
+end
+
+function Matrix4.subtractMatrix(a, b)
+	local elt = makeIdentityElt()
+
+	for x : number = 1, 4 do
+		for y : number = 1, 4 do
+			elt[x][y] = a.elt[x][y] - b.elt[x][y]
+		end
+	end
+
+	return Matrix4.new(elt)
+end
+
+function Matrix4.__sub(a, b)
+	if b.__index ~= Matrix4.__index then
+		error("attempt to perform arithmetic (sub) on Matrix4 and non Matrix4 value")
+	end
+	return Matrix4.subtractMatrix(a, b)
+end
+
+function Matrix4.multiplyMatrix(a, b)
+	local elt = makeZeroElt()
+
+	for x : number = 1, 4 do
+		for y : number = 1, 4 do
+			for i : number = 1, 4 do
+				elt[x][y] += a.elt[x][i] * b.elt[i][y]
+			end
+		end
+	end
+
+	return Matrix4.new(elt)
+end
+
+function Matrix4.multiplyNumber(a, b)
+	local elt = makeIdentityElt()
+
+	for x : number = 1, 4 do
+		for y : number = 1, 4 do
+			elt[x][y] = a.elt[x][y] * b
+		end
+	end
+
+	return Matrix4.new(elt)
+end
+
+function Matrix4.multiplyVector4(a, b)
+	local vectorValues = {b.x, b.y, b.z, b.w}
+	local values = {0, 0, 0, 0}
+
+	for x : number = 1, 4 do
+		for y : number = 1, 4 do
+			values[x] += a.elt[x][y] * vectorValues[y]
+		end
+	end
+
+	return Vector4.new(table.unpack(values))
+end
+
+function Matrix4.multiplyVector3(a, b)
+	return Matrix4.multiplyVector4(a, Vector4.fromVector3(b)):toVector3()
+end
+
+
+local MATRIX_MULTIPLICATION_HANDLERS = {
+	number = Matrix4.multiplyNumber,
+	Vector3 = Matrix4.multiplyVector3,
+	Vector4 = Matrix4.multiplyVector4,
+	Matrix4 = Matrix4.multiplyMatrix,
+}
+
+function Matrix4.__mul(a, b)
+	local bType = GetObjectType(b)
+	
+	if MATRIX_MULTIPLICATION_HANDLERS[bType] == nil then
+		error("attempt to perform arithmetic (mul) on Matrix4 and " .. bType)
+	end
+	
+	return MATRIX_MULTIPLICATION_HANDLERS[bType](a, b)
+end
+
+function Matrix4:row(x : number) 
+	local values = {0, 0, 0, 0}
+	
+	for y : number = 1, 4 do
+		values[y] = self.elt[x][y]
+	end
+	
+	return Vector4.new(table.unpack(values))
+end
+
+function Matrix4:colum(y : number)
+	local values = {}
+	
+	for x : number = 1, 4 do
+		values[x] = self.elt[x][y]
+	end
+	
+	return Vector4.new(table.unpack(values))
+end
+
+function Matrix4:transpose()
+	local elt = {}
+	for x : number = 1, 4 do
+		elt[x] = {}
+		for y : number = 1, 4 do
+			elt[x][y] = self.elt[y][x]
+		end
+	end
+	return Matrix4.new(elt)
+end
+
+function Matrix4:subDeterminant(excludeX : number, excludeY : number) : number
+	local row = {0, 0, 0}
+	local col = {0, 0, 0}
+
+	for i = 1, 3 do
+		row[i] = i
+		col[i] = i
+
+		if i >= excludeX then
+			row[i] += 1
+		end
+		
+		if i >= excludeY then
+			col[i] += 1
+		end
+	end
+
+	local cofactor11 : number = self.elt[row[2]][col[2]] * self.elt[row[3]][col[3]] - self.elt[row[2]][col[3]] * self.elt[row[3]][col[2]]
+
+	local cofactor21 : number = self.elt[row[2]][col[3]] * self.elt[row[3]][col[1]] - self.elt[row[2]][col[1]] * self.elt[row[3]][col[3]]
+
+	local cofactor31 : number = self.elt[row[2]][col[1]] * self.elt[row[3]][col[2]] - self.elt[row[2]][col[2]] * self.elt[row[3]][col[1]]
+
+	-- Product of the first row and the cofactors along the first row
+	return self.elt[row[1]][col[1]] * cofactor11 + self.elt[row[1]][col[2]] * cofactor21 + self.elt[row[1]][col[3]] * cofactor31
+end
+
+function Matrix4:cofactor() 
+	local elt = {}
+	
+	-- i is used to incrementally compute -1 ^ (r+c)
+	local i = 1
+	
+	for x : number = 1, 4 do
+		elt[x] = {}
+		for y : number = 1, 4 do
+			local det = self:subDeterminant(x, y)
+			elt[x][y] = i * det
+			i = -i
+		end
+		i = -i
+	end
+	
+	return Matrix4.new(elt)
+end
+
+function Matrix4:adjoint() 
+	return self:cofactor():transpose()
+end
+
+function Matrix4:inverse()
+	local adjointMatrix = self:adjoint()
+	
+	local determinant = adjointMatrix:colum(1):dot(self:row(1))
+	
+	return adjointMatrix * (1 / determinant)
+end
+
+return Matrix4
+]]></ProtectedString>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="ModuleScript" referent="RBXd3808b8ce7584db4bba801e1ba070e4e">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<string name="Name">Vector4</string>
+						<string name="ScriptGuid">{99479cc9-3508-4f32-bfda-b37bfb52d65c}</string>
+						<ProtectedString name="Source"><![CDATA[local SourceFolder = script.Parent.Parent
+
+local GetObjectType = require(SourceFolder.Utilities.GetObjectType)
+
+local Vector4 = {}
+Vector4.__index = Vector4
+Vector4.__objectType = "Vector4"
+
+function Vector4.new(x : number, y : number, z : number, w : number)
+	local self = setmetatable({
+		x = x,
+		y = y,
+		z = z,
+		w = w or 1,
+	}, Vector4)
+
+	return self
+end
+
+function Vector4.fromVector3(vector3)
+	return Vector4.new(vector3.X, vector3.Y, vector3.Z, 1)
+end
+
+function Vector4.addVector(a, b)
+	return Vector4.new(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w)
+end
+
+function Vector4.__add(a, b)
+	if b.__index ~= Vector4.__index then
+		error("attempt to perform arithmetic (add) on Vector4 and non Vector4 value")
+	end
+	return Vector4.addVector(a, b)
+end
+
+function Vector4.subtractVector(a, b)
+	return Vector4.new(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w)
+end
+
+function Vector4.__sub(a, b)
+	if b.__index ~= Vector4.__index then
+		error("attempt to perform arithmetic (sub) on Vector4 and non Vector4 value")
+	end
+	return Vector4.subtractVector(a, b)
+end
+
+function Vector4.multiplyNumber(a, b : number)
+	return Vector4.new(a.x * b, a.y * b, a.z * b, a.w * b)
+end
+
+function Vector4.multiplyVector(a, b)
+	return Vector4.new(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w)
+end
+
+local VECTOR_MULTIPLICATION_HANDLERS = {
+	number = Vector4.multiplyNumber,
+	Vector4 = Vector4.multiplyVector4,
+}
+
+function Vector4.__mul(a, b)
+	local bType = GetObjectType(b)
+
+	if VECTOR_MULTIPLICATION_HANDLERS[bType] == nil then
+		error("attempt to perform arithmetic (mul) on Vector4 and " .. bType)
+	end
+
+	return VECTOR_MULTIPLICATION_HANDLERS[bType](a, b)
+end
+
+function Vector4.divideNumber(a, b : number)
+	return Vector4.new(a.x / b, a.y / b, a.z / b, a.w / b)
+end
+
+function Vector4.divideVector(a, b)
+	return Vector4.new(a.x / b.x, a.y / b.y, a.z / b.z, a.w / b.w)
+end
+
+local VECTOR_DIVISION_HANDLERS = {
+	number = Vector4.multiplyNumber,
+	Vector4 = Vector4.multiplyVector4,
+}
+
+function Vector4.__div(a, b)
+	local bType = GetObjectType(b)
+
+	if VECTOR_DIVISION_HANDLERS[bType] == nil then
+		error("attempt to perform arithmetic (div) on Vector4 and " .. bType)
+	end
+
+	return VECTOR_DIVISION_HANDLERS[bType](a, b)
+end
+
+function Vector4:dot(other)
+	return self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
+end
+
+VECTOR_GET_HANDLERS = {
+	function(a) return a.x end,
+	function(a) return a.y end,
+	function(a) return a.z end,
+	function(a) return a.w end
+}
+
+function Vector4:getValue(index : number) 
+	return VECTOR_GET_HANDLERS[index](self)
+end
+
+
+function Vector4:toVector3()
+	return Vector3.new(self.x / self.w, self.y / self.w, self.z / self.w)
+end
+
+
+return Vector4
+]]></ProtectedString>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="ModuleScript" referent="RBXbc1c038143f54bd4bffde6f77adffdf5">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<string name="Name">Quaternion</string>
+						<string name="ScriptGuid">{854819a8-6f93-4029-bac4-143da1204699}</string>
+						<ProtectedString name="Source"><![CDATA[local SourceFolder = script.Parent.Parent
+
+local GetObjectType = require(SourceFolder.Utilities.GetObjectType)
+
+local Quaternion = {}
+Quaternion.__index = Quaternion
+Quaternion.__objectType = "Quaternion"
+
+function Quaternion.new(x, y, z, w)
+	local self = setmetatable({
+		x = x,
+		y = y,
+		z = z,
+		w = w
+	}, Quaternion)
+	return self
+end
+
+function Quaternion.fromMatrix(matrix)
+	local x, y, z, w
+	local tr = matrix[1][1] + matrix[2][2] + matrix[3][3];
+	if (tr > 0) then
+		local s = math.sqrt(tr + 1)
+		w = s * 0.5
+		s = 0.5 / s
+		x = (matrix[3][2] - matrix[2][3]) * s
+		y = (matrix[1][3] - matrix[3][1]) * s
+		z = (matrix[2][1] - matrix[1][2]) * s
+		
+	elseif ((matrix[1][1] > matrix[2][2]) and (matrix[1][1] > matrix[3][3])) then
+		local s = -math.sqrt(1 + matrix[1][1] - matrix[2][2] - matrix[3][3])
+		x = s * 0.5
+		s = 0.5 / s
+		y = (matrix[1][2] + matrix[2][1]) * s
+		z = (matrix[1][3] + matrix[3][1]) * s
+		w = (matrix[3][2] - matrix[2][3]) * s
+	elseif (matrix[2][2] > matrix[3][3]) then
+		local s = -math.sqrt(1 + matrix[2][2] - matrix[1][1] - matrix[3][3])
+		y = s * 0.5
+		s = 0.5 / s
+		x = (matrix[1][2] + matrix[2][1]) * s
+		z = (matrix[2][3] + matrix[3][2]) * s
+		w = (matrix[1][3] - matrix[3][1]) * s
+	else
+		local s = -math.sqrt(1 + matrix[3][3] - matrix[1][1] - matrix[2][2])
+		z = s * 0.5
+		s = 0.5 / s
+		x = (matrix[1][3] + matrix[3][1]) * s
+		y = (matrix[2][3] + matrix[3][2]) * s
+		w = (matrix[2][1] - matrix[1][2]) * s
+	end
+	return Quaternion.new(x, y, z, w)
+end
+
+function Quaternion:imag()
+	return Vector3.new(self.x, self.y, self.z)
+end
+
+function Quaternion.multiplyNumber(a, b : number)
+	return Quaternion.new(a.x * b, a.y * b, a.z * b, a.w * b)
+end
+
+function Quaternion.multiplyQuaternion(a, b)
+	-- Following Watt & Watt, page 360
+	local v1 = a:imag()
+	local v2 = b:imag()
+	local s1 = a.w
+	local s2 = b.w
+	return Quaternion.new(s1 * v2 + s2 * v1 + v1:cross(v2), s1 * s2 - v1:dot(v2))
+end
+
+local QUATERNION_MULTIPLICATION_HANDLERS = {
+	number = Quaternion.multiplyNumber,
+	Vector4 = Quaternion.multiplyQuaternion,
+}
+
+function Quaternion.__mul(a, b)
+	local bType = GetObjectType(b)
+
+	if QUATERNION_MULTIPLICATION_HANDLERS[bType] == nil then
+		error("attempt to perform arithmetic (mul) on Quaternion and " .. bType)
+	end
+
+	return QUATERNION_MULTIPLICATION_HANDLERS[bType](a, b)
+end
+
+function Quaternion:magnitude()
+	return math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z + self.w * self.w)
+end
+
+function Quaternion:normalized()
+	return self * (1 / self:magnitude())
+end
+
+return Quaternion
+]]></ProtectedString>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+			</Item>
+			<Item class="Folder" referent="RBXa35e8bd1678748b8993adc84025f73e0">
+				<Properties>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+					<bool name="DefinesCapabilities">false</bool>
+					<string name="Name">Utilities</string>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+				</Properties>
+				<Item class="ModuleScript" referent="RBX5063df43882146789ba02351fd16aef1">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<string name="Name">GetObjectType</string>
+						<string name="ScriptGuid">{9ae32249-21f8-4f5c-b5d5-07cda7c1f895}</string>
+						<ProtectedString name="Source"><![CDATA[return function(object)
+	local objectType = typeof(object)
+	if objectType == "table" and object.__objectType ~= nil then
+		return object.__objectType
+	end
+	return objectType
+end]]></ProtectedString>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="ModuleScript" referent="RBX620fdaf78fd94ebfad0fa7c6718bd816">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<string name="Name">IndexedLookup</string>
+						<string name="ScriptGuid">{cb67da93-0296-44a2-bfc0-6c920c796369}</string>
+						<ProtectedString name="Source"><![CDATA[local IndexedLookup = {}
+IndexedLookup.__index = IndexedLookup
+IndexedLookup.__objectType = "IndexedLookup"
+
+function IndexedLookup.new()
+	local self = setmetatable({
+		values = {},
+		lookup = {},
+	}, IndexedLookup)
+end
+
+function IndexedLookup:insert(value)
+	if self.lookup[value] then
+		error("Value already exists in the IndexLookup")
+	end
+	
+	table.insert(self.values, value)
+	self.lookup[value] = #self.values
+	return #self.values
+end
+
+function IndexedLookup:GetValues()
+	return self.values
+end
+
+function IndexedLookup:FindIndex(value)
+	return self.lookup[value]
+end
+
+function IndexedLookup:Destroy()
+	self.values = {}
+	self.lookup = {}
+end
+
+return IndexedLookup]]></ProtectedString>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="ModuleScript" referent="RBXc1aef2c609e14162b525fda19fa80a57">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<string name="Name">Base64EncodeBuffer</string>
+						<string name="ScriptGuid">{85194b2d-ca48-44f9-8e2d-9ff1a2b9a5d6}</string>
+						<ProtectedString name="Source"><![CDATA[--[[
+	Input buffer byte count should be a multiple 3
+]]
+
+
+local BASE64_CHARACTERS = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+	'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0',
+	'1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'}
+
+
+local _00111111 = 63
+
+return function(bufferInput, prefix, bufferLength)
+	local bufferLength = bufferLength or buffer.len(bufferInput)
+	local resultTable = {prefix}
+	
+	if bufferLength % 3 ~= 0 then
+		error("Buffer length must be a multiple of 3")
+	end
+	
+	for i = 0, bufferLength - 1, 3 do
+		-- Addapted from https://en.wikibooks.org/wiki/Algorithm_Implementation/Miscellaneous/Base64
+		
+		-- these three 8-bit (ASCII) characters become one 24-bit number
+		local combine = bit32.lshift(buffer.readu8(bufferInput, i), 16) +
+						bit32.lshift(buffer.readu8(bufferInput, i + 1), 8) +
+						buffer.readu8(bufferInput, i + 2)
+
+		-- this 24-bit number gets separated into four 6-bit numbers
+		table.insert(resultTable, BASE64_CHARACTERS[bit32.band(bit32.rshift(combine, 18), _00111111) + 1])
+		table.insert(resultTable, BASE64_CHARACTERS[bit32.band(bit32.rshift(combine, 12), _00111111) + 1])
+		table.insert(resultTable, BASE64_CHARACTERS[bit32.band(bit32.rshift(combine, 6), _00111111) + 1])
+		table.insert(resultTable, BASE64_CHARACTERS[bit32.band(combine, _00111111) + 1])
+	end
+	
+	return table.concat(resultTable)
+end]]></ProtectedString>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="ModuleScript" referent="RBX441de09e39dd462fa451b14a65ac300b">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<string name="Name">RemoveNils</string>
+						<string name="ScriptGuid">{479260d8-5857-4b05-bd9f-ab427ab2977b}</string>
+						<ProtectedString name="Source"><![CDATA[return function(array)
+	local reindexed = {}
+	for _, value in array do
+		if value ~= nil then
+			table.insert(reindexed, value)
+		end
+	end
+	return reindexed
+end]]></ProtectedString>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+			</Item>
+			<Item class="Folder" referent="RBX98cc675e1bbc41f689d122ab7cbf8fc0">
+				<Properties>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+					<bool name="DefinesCapabilities">false</bool>
+					<string name="Name">Geometry</string>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+				</Properties>
+				<Item class="ModuleScript" referent="RBX0db7268fb41b4cd39314b5cc6bc7016e">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<string name="Name">Mesh</string>
+						<string name="ScriptGuid">{c792032d-89ad-4300-bd84-793315f9c6f2}</string>
+						<ProtectedString name="Source"><![CDATA[local SourceFolder = script.Parent.Parent
+
+local Vertex = require(SourceFolder.Geometry.Vertex)
+
+local Mesh = {}
+Mesh.__index = Mesh
+Mesh.__objectType = "Mesh"
+
+function Mesh.new()
+	local self = setmetatable({
+		_positions = {},
+		_normals = {},
+		_uvs = {},
+		_vertexColors = {},
+		_verticies = {},
+		_polygons = {},
+		_min = Vector3.new(math.huge, math.huge, math.huge),
+		_max = Vector3.new(-math.huge, -math.huge, -math.huge),
+	}, Mesh)
+	
+	return self
+end
+
+function Mesh:_updateBounds(position)
+	if position.X < self._min.X or 
+		position.Y < self._min.Y or
+		position.Z < self._min.Z then
+		self._min = Vector3.new(
+			math.min(position.X, self._min.X),
+			math.min(position.Y, self._min.Y),
+			math.min(position.Z, self._min.Z))
+	end
+	if position.X > self._max.X or 
+		position.Y > self._max.Y or
+		position.Z > self._max.Z then
+		self._max = Vector3.new(
+			math.max(position.X, self._max.X),
+			math.max(position.Y, self._max.Y),
+			math.max(position.Z, self._max.Z))
+	end
+end
+
+function Mesh:AddPosition(position : Vector3)
+	self:_updateBounds(position)
+	table.insert(self._positions, position)
+	return #self._positions
+end
+
+function Mesh:AddNormal(normal : Vector3)
+	--if typeof(normal) ~= "Vector3" then error() end
+	table.insert(self._normals, normal)
+	return #self._normals
+end
+
+function Mesh:AddUV(uv : Vector2)
+	table.insert(self._uvs, uv)
+	return #self._uvs
+end
+
+function Mesh:AddVertexColor(color : Color3)
+	table.insert(self._vertexColors, color)
+	return #self._vertexColors
+end
+
+function Mesh:AddVertex(vertex)
+	table.insert(self._verticies, vertex)
+	return #self._verticies
+end
+
+function Mesh:AddTriangle(index1, index2, index3)
+	table.insert(self._polygons, {index1, index2, index3})
+	return #self._polygons
+end
+
+local function arrayHelper(verticies, vertexType, values, default)
+	local array = {}
+	local vertexType = Vertex.indexLookups.POSITION_INDEX
+
+	for index, vertex in verticies do
+		local valueIndex = vertex:getValue(vertexType)
+		if valueIndex ~= -1 then
+			table.insert(array, values[valueIndex])
+		else
+			table.insert(array, default)
+		end
+	end
+
+	return array
+end
+
+function Mesh:GetTriangleIndiciesArray()
+	local array = {}
+	for _, polygon in self._polygons do
+		if #polygon ~= 3 then
+			error("Triangulation not supported")
+		end
+		for _, index in polygon do
+			table.insert(array, index - 1)
+		end
+	end
+	return array
+end
+
+function Mesh:GetPositionArray()
+	return arrayHelper(self._verticies, Vertex.indexLookups.POSITION_INDEX, self._positions, Vector3.zero)
+end
+
+function Mesh:GetNormalArray()
+	return arrayHelper(self._verticies, Vertex.indexLookups.POSITION_INDEX, self._normals, Vector3.yAxis)
+end
+
+function Mesh:GetUvArray()
+	return arrayHelper(self._verticies, Vertex.indexLookups.POSITION_INDEX, self._uvs, Vector2.zero)
+end
+
+function Mesh:GetMax()
+	return self._max
+end
+
+function Mesh:GetMin()
+	return self._min
+end
+
+function Mesh:RecalculateBounds()
+	self._min = Vector3.new(math.huge, math.huge, math.huge)
+	self._max = Vector3.new(-math.huge, -math.huge, -math.huge)
+	for _, position in self._positions do
+		self:_updateBounds(position)
+	end
+end
+
+
+return Mesh
+]]></ProtectedString>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="ModuleScript" referent="RBX3f4715633f2e40c2887604c62c416164">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<string name="Name">Vertex</string>
+						<string name="ScriptGuid">{3253128d-949d-4d7e-85f8-b868352ba3e4}</string>
+						<ProtectedString name="Source"><![CDATA[local Vertex = {}
+Vertex.__index = Vertex
+Vertex.__objectType = "Vertex"
+
+Vertex.indexLookups = {
+	POSITION_INDEX = 1,
+	NORMAL_INDEX = 2,
+	UV_INDEX = 3,
+	VERTEX_COLOR_INDEX = 4
+}
+
+function Vertex.new(positionIndex, normalIndex, uvIndex, vertexColorIndex)
+	local self = setmetatable({
+		positionIndex,
+		normalIndex or -1,
+		uvIndex or -1,
+		vertexColorIndex or -1
+	}, Vertex)
+	
+	return self
+end
+
+function Vertex:getValue(valueType)
+	return self[valueType]
+end
+
+function Vertex:hasNormal()
+	return self[Vertex.indexLookups.NORMAL_INDEX] ~= -1
+end
+
+function Vertex:hasUv()
+	return self[Vertex.indexLookups.UV_INDEX] ~= -1
+end
+
+function Vertex:hasVertexColor()
+	return self[Vertex.indexLookups.VERTEX_COLOR_INDEX] ~= -1
+end
+
+return Vertex]]></ProtectedString>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="Folder" referent="RBX00b98b455f27478ca8c493f99d37f9ca">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<string name="Name">Constructors</string>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+					<Item class="ModuleScript" referent="RBXdb3d788d9fed476db1e8aeec9324ab16">
+						<Properties>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<Content name="LinkedSource"><null></null></Content>
+							<string name="Name">Block</string>
+							<string name="ScriptGuid">{f1c77896-810d-40b1-b3cd-3643face5b0c}</string>
+							<ProtectedString name="Source"><![CDATA[local SourceFolder = script.Parent.Parent.Parent
+
+local Mesh = require(SourceFolder.Geometry.Mesh)
+
+local AddCubeFace = require(SourceFolder.Geometry.Constructors.Helpers.AddCubeFace)
+
+return function (color : Color3)
+	local Block = Mesh.new()
+
+	for i = 1, 6 do
+		AddCubeFace(Block, i, color)
+	end
+
+	return Block
+end]]></ProtectedString>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+					</Item>
+					<Item class="Folder" referent="RBXdf3cb7ee9d8343b58e8c3570b1c9053a">
+						<Properties>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<string name="Name">Helpers</string>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+						<Item class="ModuleScript" referent="RBXb83ad76b21ab43ad800ff187cc23da70">
+							<Properties>
+								<BinaryString name="AttributesSerialize"></BinaryString>
+								<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+								<bool name="DefinesCapabilities">false</bool>
+								<Content name="LinkedSource"><null></null></Content>
+								<string name="Name">AddCubeFace</string>
+								<string name="ScriptGuid">{4f102a53-89c9-4e96-9aff-c1f46de85bef}</string>
+								<ProtectedString name="Source"><![CDATA[local SourceFolder = script.Parent.Parent.Parent.Parent
+
+local GetDirectionFromFace = require(SourceFolder.Geometry.Constructors.Helpers.GetDirectionFromFace)
+local CreateMeshVertex = require(SourceFolder.Geometry.Constructors.Helpers.CreateMeshVertex)
+local CreateQuad = require(SourceFolder.Geometry.Constructors.Helpers.CreateQuad)
+
+return function (mesh, faceIndex : number, color : Color3)
+	local orientation = if faceIndex > 3 then -1 else 1
+	
+	local normal = GetDirectionFromFace(faceIndex) * orientation
+	local halfNormal = normal * 0.5
+	local forward = GetDirectionFromFace(faceIndex + 1) * orientation * 0.5
+	local right = GetDirectionFromFace(faceIndex + 2) * 0.5
+
+	local p1 = CreateMeshVertex(mesh, halfNormal + forward + right, normal, Vector2.new(0, 0), color)
+	local p2 = CreateMeshVertex(mesh, halfNormal - forward + right, normal, Vector2.new(1, 0), color)
+	local p3 = CreateMeshVertex(mesh, halfNormal - forward - right, normal, Vector2.new(1, 1), color)
+	local p4 = CreateMeshVertex(mesh, halfNormal + forward - right, normal, Vector2.new(0, 1), color)
+
+	CreateQuad(mesh, p1, p2, p3, p4)
+end]]></ProtectedString>
+								<int64 name="SourceAssetId">-1</int64>
+								<BinaryString name="Tags"></BinaryString>
+							</Properties>
+						</Item>
+						<Item class="ModuleScript" referent="RBX7eca12c229c24606867e0e67cdf0163a">
+							<Properties>
+								<BinaryString name="AttributesSerialize"></BinaryString>
+								<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+								<bool name="DefinesCapabilities">false</bool>
+								<Content name="LinkedSource"><null></null></Content>
+								<string name="Name">GetDirectionFromFace</string>
+								<string name="ScriptGuid">{49f88f00-8e8a-4c48-9648-0b0d9cdb3d09}</string>
+								<ProtectedString name="Source"><![CDATA[local DIRECTION_LOOKUP = {
+	Vector3.xAxis,
+	Vector3.yAxis,
+	Vector3.zAxis
+}
+
+return function(faceIndex)
+	return DIRECTION_LOOKUP[(faceIndex - 1) % 3 + 1]
+end]]></ProtectedString>
+								<int64 name="SourceAssetId">-1</int64>
+								<BinaryString name="Tags"></BinaryString>
+							</Properties>
+						</Item>
+						<Item class="ModuleScript" referent="RBX16788c80bcc34089ad50706f2bd80694">
+							<Properties>
+								<BinaryString name="AttributesSerialize"></BinaryString>
+								<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+								<bool name="DefinesCapabilities">false</bool>
+								<Content name="LinkedSource"><null></null></Content>
+								<string name="Name">GetSignedDirectionFromFace</string>
+								<string name="ScriptGuid">{3bb0d341-14a7-4b55-b997-a7855e93a2d3}</string>
+								<ProtectedString name="Source"><![CDATA[local SourceFolder = script.Parent.Parent.Parent.Parent
+
+local GetDirectionFromFace = require(SourceFolder.Geometry.Constructors.Helpers.GetDirectionFromFace)
+
+return function(faceIndex)
+	local orientation = if faceIndex > 3 then -1 else 1
+	return GetDirectionFromFace(faceIndex) * orientation
+end]]></ProtectedString>
+								<int64 name="SourceAssetId">-1</int64>
+								<BinaryString name="Tags"></BinaryString>
+							</Properties>
+						</Item>
+						<Item class="ModuleScript" referent="RBX375a46d43d2f4aa9a821e1c70df82241">
+							<Properties>
+								<BinaryString name="AttributesSerialize"></BinaryString>
+								<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+								<bool name="DefinesCapabilities">false</bool>
+								<Content name="LinkedSource"><null></null></Content>
+								<string name="Name">CreateMeshVertex</string>
+								<string name="ScriptGuid">{a35450a1-80f9-4ab0-9d12-70df48f5df14}</string>
+								<ProtectedString name="Source"><![CDATA[local SourceFolder = script.Parent.Parent.Parent.Parent
+
+local Vertex = require(SourceFolder.Geometry.Vertex)
+
+return function(mesh, position, normal, uv, color)
+	local positionIndex = mesh:AddPosition(position)
+	local normalIndex = mesh:AddNormal(normal)
+	local uvIndex = mesh:AddUV(uv)
+	local colorIndex = mesh:AddVertexColor(color)
+	
+	return mesh:AddVertex(Vertex.new(positionIndex, normalIndex, uvIndex, colorIndex))
+end]]></ProtectedString>
+								<int64 name="SourceAssetId">-1</int64>
+								<BinaryString name="Tags"></BinaryString>
+							</Properties>
+						</Item>
+						<Item class="ModuleScript" referent="RBXc1e5efc021ef4974b6d7e23a6798ddb2">
+							<Properties>
+								<BinaryString name="AttributesSerialize"></BinaryString>
+								<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+								<bool name="DefinesCapabilities">false</bool>
+								<Content name="LinkedSource"><null></null></Content>
+								<string name="Name">CreateQuad</string>
+								<string name="ScriptGuid">{035f9a2d-bd75-460f-80a4-f671d846194c}</string>
+								<ProtectedString name="Source"><![CDATA[return function(mesh, p1, p2, p3, p4)
+	mesh:AddTriangle(p1, p2, p3)
+	mesh:AddTriangle(p3, p4, p1)
+end]]></ProtectedString>
+								<int64 name="SourceAssetId">-1</int64>
+								<BinaryString name="Tags"></BinaryString>
+							</Properties>
+						</Item>
+					</Item>
+					<Item class="ModuleScript" referent="RBXd8ae56dac73147269e1f8d29012a6d85">
+						<Properties>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<Content name="LinkedSource"><null></null></Content>
+							<string name="Name">FromMeshId</string>
+							<string name="ScriptGuid">{967b6b33-4dcd-49bf-8b8d-a21f2ff19fe7}</string>
+							<ProtectedString name="Source"><![CDATA[local SourceFolder = script.Parent.Parent.Parent
+
+local Mesh = require(SourceFolder.Geometry.Mesh)
+local Vertex = require(SourceFolder.Geometry.Vertex)
+
+local ApplyMatrixToMesh = require(SourceFolder.Geometry.Manipulation.ApplyMatrixToMesh)
+
+local Matrix4 = require(SourceFolder.Math.Matrix4)
+
+local AssetService = game:GetService("AssetService")
+
+return function(uri)
+	local mesh = Mesh.new()
+	
+	local content = Content.fromUri(uri)
+	local editableMesh = AssetService:CreateEditableMeshAsync(content)
+	
+	local positionLookup = {}
+	for _, vertexId in editableMesh:GetVertices() do
+		positionLookup[vertexId] = mesh:AddPosition(editableMesh:GetPosition(vertexId))
+	end
+	
+	local normalLookup = {}
+	for _, normalId in editableMesh:GetNormals() do
+		normalLookup[normalId] = mesh:AddNormal(editableMesh:GetNormal(normalId))
+	end
+	
+	local uvLookup = {}
+	for _, uvId in editableMesh:GetUVs() do
+		uvLookup[uvId] = mesh:AddUV(editableMesh:GetUV(uvId))
+	end
+	
+	for _, faceId in editableMesh:GetFaces() do
+		local positions = editableMesh:GetFaceVertices(faceId)
+		local normals = editableMesh:GetFaceNormals(faceId)
+		local uvs = editableMesh:GetFaceUVs(faceId)
+		
+		local face = {}
+		
+		for index, position in positions do
+			local vertex = Vertex.new(
+				positionLookup[position],
+				normalLookup[normals[index]] or -1,
+				uvLookup[uvs[index]] or -1
+			)
+			table.insert(face, mesh:AddVertex(vertex))
+		end
+		
+		mesh:AddTriangle(table.unpack(face))
+	end
+	
+	local center = (mesh:GetMax() + mesh:GetMin()) / 2
+	local scale = mesh:GetMax() - mesh:GetMin()
+	local inverseScale = Vector3.new(1 / scale.X, 1 / scale.Y, 1 / scale.Z)
+	
+	local transform = Matrix4.fromVectorScale(inverseScale) * Matrix4.fromVectorTranslation(-center)
+	
+	ApplyMatrixToMesh(mesh, transform)
+	
+	return mesh
+end]]></ProtectedString>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+					</Item>
+					<Item class="ModuleScript" referent="RBXb791a36e534346bcb340c87994991e8d">
+						<Properties>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<Content name="LinkedSource"><null></null></Content>
+							<string name="Name">Cylinder</string>
+							<string name="ScriptGuid">{3fcc6ce4-060b-41b1-9975-76779079fe6c}</string>
+							<ProtectedString name="Source"><![CDATA[local SourceFolder = script.Parent.Parent.Parent
+
+local Mesh = require(SourceFolder.Geometry.Mesh)
+
+local GetDirectionFromFace = require(SourceFolder.Geometry.Constructors.Helpers.GetDirectionFromFace)
+local GetSignedDirectionFromFace = require(SourceFolder.Geometry.Constructors.Helpers.GetSignedDirectionFromFace)
+local CreateMeshVertex = require(SourceFolder.Geometry.Constructors.Helpers.CreateMeshVertex)
+
+return function (color : Color3)
+	local cylinder = Mesh.new()
+
+	local segmentsPerFace = 6
+	local vertsPerFace = segmentsPerFace + 1
+
+	local roundedFaces = {3, 2, 6, 5}
+
+	local right = Vector3.xAxis
+
+	--Make curved sides
+	for faceIndex = 1, 4 do
+		local forwardFace = roundedFaces[faceIndex]
+		local upFace = roundedFaces[(faceIndex % 4) + 1]
+
+		local forward = GetSignedDirectionFromFace(forwardFace)
+		local up = GetSignedDirectionFromFace(upFace)
+		
+		local verticies = {}
+
+		for direction = -1, 1, 2 do
+			local side = (direction + 1) / 2
+			for u = 0, vertsPerFace - 1 do
+				local offsetU = (u / segmentsPerFace) * 2 - 1
+
+				local vertexNormal = (forward + up * offsetU).Unit
+				table.insert(verticies, CreateMeshVertex(cylinder, (right / 2) * direction + vertexNormal / 2, vertexNormal, Vector2.new(side, u / segmentsPerFace), color))
+			end
+		end
+
+		for index = 1, segmentsPerFace do
+			local index0 = verticies[index]
+			local index1 = verticies[index + vertsPerFace]
+			local index2 = verticies[index + 1 + vertsPerFace]
+			local index3 = verticies[index + 1]
+
+			cylinder:AddTriangle(index0, index1, index2)
+			cylinder:AddTriangle(index2, index3, index0)
+		end
+	end
+
+	-- Make end caps
+	for direction = -1, 1, 2 do
+		local side = (direction + 1) / 2
+		local normal = right * direction
+
+		-- Add center vertex
+		local centerIndex = CreateMeshVertex(cylinder, normal / 2, normal, Vector2.new(0.5, 0.5), color)
+
+		-- Add each sides verticies and triangles
+		for faceIndex = 1, 4 do
+			local forwardFace = roundedFaces[faceIndex]
+			local upFace = roundedFaces[(faceIndex % 4) + 1]
+
+			local forward = GetSignedDirectionFromFace(forwardFace)
+			local up = GetSignedDirectionFromFace(upFace)
+			
+			local verticies = {}
+
+
+			for u = 0, vertsPerFace - 1 do
+				local offsetU = (u / segmentsPerFace) * 2 - 1
+				local vertexPosition = (forward + up * offsetU).Unit / 2
+				
+				table.insert(verticies, CreateMeshVertex(cylinder, normal / 2 + vertexPosition, normal, Vector2.new(0.5 + vertexPosition.z, 0.5 + vertexPosition.y), color))
+			end
+
+			for index = 1, segmentsPerFace do
+				local index0 = verticies[index + side]
+				local index1 = verticies[index + (1 - side)]
+				cylinder:AddTriangle(centerIndex, index0,  index1)
+			end
+		end
+	end
+
+	return cylinder
+end]]></ProtectedString>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+					</Item>
+					<Item class="ModuleScript" referent="RBXc391d88645044d25b004481f00169240">
+						<Properties>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<Content name="LinkedSource"><null></null></Content>
+							<string name="Name">Ball</string>
+							<string name="ScriptGuid">{fc51c2ba-2bc8-4e6c-a035-507997fadd16}</string>
+							<ProtectedString name="Source"><![CDATA[local SourceFolder = script.Parent.Parent.Parent
+
+local Mesh = require(SourceFolder.Geometry.Mesh)
+
+local GetDirectionFromFace = require(SourceFolder.Geometry.Constructors.Helpers.GetDirectionFromFace)
+local GetSignedDirectionFromFace = require(SourceFolder.Geometry.Constructors.Helpers.GetSignedDirectionFromFace)
+local CreateMeshVertex = require(SourceFolder.Geometry.Constructors.Helpers.CreateMeshVertex)
+
+return function (color : Color3)
+	local ball = Mesh.new()
+
+	local segmentsPerFace = 6
+	local vertsPerFace = segmentsPerFace + 1
+
+	for  face = 1, 6 do
+		local direction = if face > 3 then -1 else 1
+		local up = GetDirectionFromFace(face) * direction
+		local forward = GetDirectionFromFace(face + 1) * direction
+		local right = GetDirectionFromFace(face + 2)
+		local verticies = {}
+
+		-- Create verticies
+		for u = 0, vertsPerFace - 1 do
+			for v = 0, vertsPerFace - 1 do
+				local offsetU = (u / segmentsPerFace) * 2 - 1
+				local offsetV = (v / segmentsPerFace) * 2 - 1
+				local vertexNormal = (up + forward * offsetU + right * offsetV).Unit
+				table.insert(verticies, CreateMeshVertex(ball, vertexNormal / 2, vertexNormal, Vector2.new(u, v) / segmentsPerFace, color))
+			end
+		end
+
+		-- Create triangles
+		for u = 0, segmentsPerFace - 1 do
+			for v = 0, segmentsPerFace - 1 do
+				local index0 =  verticies[u + v * vertsPerFace + 1]
+				local index1 = verticies[(u + 1) + v * vertsPerFace + 1]
+				local index2 = verticies[(u + 1) + (v + 1) * vertsPerFace + 1]
+				local index3 =  verticies[u + (v + 1) * vertsPerFace + 1]
+
+				ball:AddTriangle(index0, index1, index2)
+				ball:AddTriangle(index2, index3, index0)
+			end
+		end
+	end
+
+	return ball
+end]]></ProtectedString>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+					</Item>
+					<Item class="ModuleScript" referent="RBX1e5e4dee7a894ebaa03d0f5595941a46">
+						<Properties>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<Content name="LinkedSource"><null></null></Content>
+							<string name="Name">Wedge</string>
+							<string name="ScriptGuid">{2694436e-ed95-4647-b6f6-9f1e8f9f112d}</string>
+							<ProtectedString name="Source"><![CDATA[local SourceFolder = script.Parent.Parent.Parent
+
+local Mesh = require(SourceFolder.Geometry.Mesh)
+
+local GetDirectionFromFace = require(SourceFolder.Geometry.Constructors.Helpers.GetDirectionFromFace)
+local GetSignedDirectionFromFace = require(SourceFolder.Geometry.Constructors.Helpers.GetSignedDirectionFromFace)
+local CreateMeshVertex = require(SourceFolder.Geometry.Constructors.Helpers.CreateMeshVertex)
+local AddCubeFace = require(SourceFolder.Geometry.Constructors.Helpers.AddCubeFace)
+local CreateQuad = require(SourceFolder.Geometry.Constructors.Helpers.CreateQuad)
+
+return function (color : Color3)
+	local wedge = Mesh.new()
+
+	-- Z Positive and Y Negative are full faces
+	local fullFaces = {3, 2 + 3};
+	for _, face in fullFaces do
+		AddCubeFace(wedge, face, color)
+	end
+
+	-- Z Negative and Y Positive are combined into one face
+	local up = Vector3.yAxis / 2
+	local right = Vector3.xAxis / 2
+	local forward = Vector3.zAxis / 2
+	local normal = (up - forward).Unit
+	local index0 = CreateMeshVertex(wedge, forward + up + right, normal, Vector2.new(1, math.sqrt(2)), color)
+	local index1 = CreateMeshVertex(wedge, -forward - up + right, normal, Vector2.new(1, 0), color)
+	local index2 = CreateMeshVertex(wedge, -forward - up - right, normal, Vector2.new(0, 0), color)
+	local index3 = CreateMeshVertex(wedge, forward + up - right, normal, Vector2.new(0, math.sqrt(2)), color)
+
+	CreateQuad(wedge, index0, index1, index2, index3)
+
+
+	-- X Positive and X Negative are just 1 triangle
+	for direction = -1, 1, 2 do
+		local side = (direction + 1) / 2
+		local sideNormal = right * 2 * direction
+		local index0 = CreateMeshVertex(wedge, forward + up + right * direction, sideNormal, Vector2.new(side, 1), color)
+		local index1 = CreateMeshVertex(wedge, forward - up + right * direction, sideNormal, Vector2.new(0, 0), color)
+		local index2 = CreateMeshVertex(wedge, -forward - up + right * direction, sideNormal, Vector2.new(1, 0), color)
+		
+		if side == 0 then
+			wedge:AddTriangle(index0, index2, index1)
+		else
+			wedge:AddTriangle(index0, index1, index2)
+		end
+	end
+
+	return wedge
+end]]></ProtectedString>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+					</Item>
+				</Item>
+				<Item class="Folder" referent="RBXd2b41c70e909433aa75e19d6e5765e77">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<string name="Name">Manipulation</string>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+					<Item class="ModuleScript" referent="RBXb3b0f4281cc0476a9108026c2b7f64f8">
+						<Properties>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<Content name="LinkedSource"><null></null></Content>
+							<string name="Name">ApplyMatrixToMesh</string>
+							<string name="ScriptGuid">{353fc7fa-24d7-4076-b639-f03958d74e20}</string>
+							<ProtectedString name="Source"><![CDATA[return function(mesh, matrix)
+	local normalMatrix = matrix:inverse():transpose()
+	
+	for index, position in mesh._positions do
+		mesh._positions[index] = matrix * position
+	end
+	
+	for index, normal in mesh._normals do
+		mesh._normals[index] = (normalMatrix * normal).Unit
+	end
+	
+	mesh:RecalculateBounds()
+end]]></ProtectedString>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+					</Item>
+				</Item>
+			</Item>
+			<Item class="Folder" referent="RBXd0cf815e17a94e3c8bfbd6ff2647c6bb">
+				<Properties>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+					<bool name="DefinesCapabilities">false</bool>
+					<string name="Name">Gltf</string>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+				</Properties>
+				<Item class="ModuleScript" referent="RBX12970606e1274954ae0d43660a9165f9">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<string name="Name">GltfExporter</string>
+						<string name="ScriptGuid">{428017a8-ecbf-4f06-a2c9-e59cc3ff7646}</string>
+						<ProtectedString name="Source"><![CDATA[local SourceFolder = script.Parent.Parent
+
+local GltfScene = require(SourceFolder.Gltf.GltfScene)
+local GltfNode = require(SourceFolder.Gltf.GltfNode)
+local GltfMesh = require(SourceFolder.Gltf.GltfMesh)
+local GltfAccessor = require(SourceFolder.Gltf.GltfAccessor)
+local GltfBufferView = require(SourceFolder.Gltf.GltfBufferView)
+local GltfBuffer = require(SourceFolder.Gltf.GltfBuffer)
+local GltfMaterial = require(SourceFolder.Gltf.GltfMaterial)
+local GltfTexture = require(SourceFolder.Gltf.GltfTexture)
+local GltfImage = require(SourceFolder.Gltf.GltfImage)
+local GltfSampler = require(SourceFolder.Gltf.GltfSampler)
+
+
+local GetGltfMesh = require(SourceFolder.Gltf.Helpers.GetGltfMesh)
+
+local MeshIdentifier = require(SourceFolder.Gltf.Identifiers.MeshIdentifier)
+local MaterialIdentifier = require(SourceFolder.Gltf.Identifiers.MaterialIdentifier)
+
+local IndexedLookup = require(SourceFolder.Utilities.IndexedLookup)
+
+local HttpService = game:GetService("HttpService")
+
+local GltfExporter = {}
+GltfExporter.__index = GltfExporter
+GltfExporter.__objectType = "GltfExporer"
+
+local EXPORT_TYPES = {
+	scenes = {containedType = GltfScene},
+	nodes = {containedType = GltfNode},
+	meshes = {containedType = GltfMesh},
+	accessors = {containedType = GltfAccessor},
+	bufferViews = {containedType = GltfBufferView},
+	buffers = {containedType = GltfBuffer},
+	materials = {containedType = GltfMaterial},
+	textures = {containedType = GltfTexture},
+	images = {containedType = GltfImage},
+	samplers = {containedType = GltfSampler},
+}
+
+function GltfExporter.new()
+	local self = setmetatable({
+		_exportIndex = {},
+		_exportOrder = {},
+		_nodeInstanceLookup = {},
+		_caches = {
+			meshLoaded = {}, -- {MeshString : true}
+			accessorLookup = {}, -- {AccessorString : Accessor}
+			meshLookup = {}, -- {MeshString : Mesh}
+			materialLookup = {}, -- {MaterialString : Material}
+			textureLookup = {}, -- {TextureString : Texture}
+			samplerLookup = {}, -- {SamplerString : Sampler}
+		}
+	}, GltfExporter)
+	
+	for exportType, data in EXPORT_TYPES do
+		self[exportType] = {}
+	end
+	
+	return self
+end
+
+function GltfExporter:populateScene(name, root)
+	local newScene = GltfScene.new()
+	newScene:SetExporter(self)
+	newScene:SetName(name)
+	
+	local rootNode = self:MakeNodeFromInstance(root)
+	
+	newScene:AddNode(rootNode)
+	self.scenes[newScene] = true
+end
+
+local function getCFrame(instance : Instance)
+	if instance:IsA("BasePart") then
+		return instance.CFrame
+	elseif instance:IsA("PVInstance") then
+		instance:GetPivot()
+	elseif instance.Parent ~= nil then
+		return getCFrame(instance.Parent)
+	end
+	return CFrame.identity
+end
+
+local function getSize(instance : Instance)
+	if instance:IsA("BasePart") then
+		return instance.Size
+	end
+	return Vector3.one
+end
+
+function GltfExporter:MakeNodeFromInstance(instance, nodeParent)
+	local scale = getSize(instance)
+	
+	local newNode = GltfNode.new()
+	newNode:SetExporter(self)
+	newNode:SetName(instance.Name)
+	newNode:SetCFrame(getCFrame(instance))
+	newNode:SetScale(scale)
+	newNode:SetParent(nodeParent)
+	
+	local children = instance:GetChildren()
+	
+	local meshIdentifier = MeshIdentifier.new(instance)
+	if meshIdentifier:GetString() then
+		local materialIdentifier = MaterialIdentifier.new(instance)
+		
+		newNode:SetMesh(GetGltfMesh(self, meshIdentifier, materialIdentifier))
+	else
+		if #children == 0 then
+			return
+		end
+	end
+	
+	
+	self.nodes[newNode] = true
+	self._nodeInstanceLookup[instance] = newNode
+	
+	for _, child in children do
+		local childNode = self:MakeNodeFromInstance(child, newNode)
+		newNode:AddChild(childNode)
+	end
+	
+	return newNode
+end
+
+function GltfExporter:GetObjectIndex(object)
+	local index = self._exportIndex[object]
+	if index == nil then
+		if not next(self._exportIndex) then
+			error("Index for object not found, getObjectIndex may have been called before export.exportIndex was populated")
+		end
+		error("Index for object not found")
+	end
+	return index
+end
+
+function GltfExporter:WriteToJson()
+	self._exportIndex = {}
+	self._exportOrder = {}
+	
+	-- Pre populate indexes so that they can be referenced in the json before they are populated
+	for exportType, _ in EXPORT_TYPES do
+		local objects = {}
+		for object, _ in self[exportType] do
+			table.insert(objects, object)
+			self._exportIndex[object] = #objects - 1 -- json/gltf is 0 indexed
+		end
+		self._exportOrder[exportType] = objects
+	end
+	
+	local jsonData = {}
+	jsonData.scene = 0
+	jsonData.asset = {
+		generator = "Roblox Luau Export",
+		version = "2.0",
+	}
+	
+	for exportType, objects in self._exportOrder do
+		local exportData = {}
+		for index, object in objects do
+			table.insert(exportData, object:ToJsonData())
+		end
+		jsonData[exportType] = exportData
+	end
+	
+	return HttpService:JSONEncode(jsonData)
+end
+
+function GltfExporter:Destroy()
+	self._caches = {}
+end
+
+return GltfExporter]]></ProtectedString>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="ModuleScript" referent="RBX8aa8c45da3b344de8a0264185ce15112">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<string name="Name">GltfNode</string>
+						<string name="ScriptGuid">{dea28016-15d6-4e83-82df-b70989e6eb74}</string>
+						<ProtectedString name="Source"><![CDATA[local CFRAME_EPSILON = 0.00001
+
+local SourceFolder = script.Parent.Parent
+
+local Matrix4 = require(SourceFolder.Math.Matrix4)
+local Quaternion = require(SourceFolder.Math.Quaternion)
+
+local GltfNode = {}
+GltfNode.__index = GltfNode
+GltfNode.__objectType = "GltfNode"
+
+function GltfNode.new()
+	local self = setmetatable({
+		_exporter = nil,
+		_name = nil,
+		_parent = nil,
+		_children = {},
+		_cframe  = CFrame.identity,
+		_scale = Vector3.one,
+		_mesh = nil,
+	}, GltfNode)
+	
+	return self
+end
+
+function GltfNode:SetExporter(exporter)
+	self._exporter = exporter
+end
+
+function GltfNode:SetName(name)
+	self._name = name
+end
+
+function GltfNode:SetParent(node)
+	self._parent = node
+end
+
+function GltfNode:SetCFrame(cframe)
+	self._cframe = cframe
+end
+
+function GltfNode:SetScale(scale)
+	self._scale = scale
+end
+
+function GltfNode:SetMesh(mesh)
+	self._mesh = mesh
+end
+
+function GltfNode:AddChild(node)
+	table.insert(self._children, node)
+end
+
+local function getRotationFromCFrame(cframe)
+	local matrix = Matrix4.fromCFrame(cframe)
+	return Quaternion.fromMatrix(matrix.elt):normalized()
+end
+
+function GltfNode:ToJsonData()
+	local jsonData = {
+		name = self._name,
+	}
+	
+	-- Populate transform data
+	if self._parent == nil or not self._parent._cframe:FuzzyEq(self._cframe, CFRAME_EPSILON) then
+		local relativeCframe = self._cframe
+		if self._parent then
+			relativeCframe = self._parent._cframe:ToObjectSpace(relativeCframe)
+		end
+		local rotation = getRotationFromCFrame(relativeCframe)
+		local translation = relativeCframe.Position
+		jsonData.rotation = {rotation.x, rotation.y, rotation.z, rotation.w}
+		jsonData.translation = {translation.x, translation.y, translation.z}
+	end
+	
+	if not self._scale:FuzzyEq(Vector3.one) then
+		jsonData.scale = {self._scale.x, self._scale.y, self._scale.z}
+	end
+	
+	if self._mesh ~= nil then
+		jsonData.mesh = self._exporter:GetObjectIndex(self._mesh)
+	end
+	
+	-- Populate children
+	if next(self._children) then
+		jsonData.children = {}
+		for _, child in self._children do
+			table.insert(jsonData.children, self._exporter:GetObjectIndex(child))
+		end
+	end
+	
+	return jsonData
+end
+
+function GltfNode:Destroy()
+	self._exporter = nil
+	self._parent = nil
+	self._children = nil
+end
+
+return GltfNode]]></ProtectedString>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="ModuleScript" referent="RBX6cd0ef4109074100ba2d660ea12f04eb">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<string name="Name">GltfScene</string>
+						<string name="ScriptGuid">{90a7f416-7a31-4085-a6fe-d1b18c4d3523}</string>
+						<ProtectedString name="Source"><![CDATA[local GltfScene = {}
+GltfScene.__index = GltfScene
+GltfScene.__objectType = "GltfScene"
+
+function GltfScene.new()
+	local self = setmetatable({
+		_exporter = nil,
+		_name = nil,
+		_nodes = {}
+	}, GltfScene)
+	
+	return self
+end
+
+function GltfScene:SetExporter(exporter)
+	self._exporter = exporter
+end
+
+function GltfScene:SetName(name)
+	self._name = name
+end
+
+function GltfScene:AddNode(node)
+	table.insert(self._nodes, node)
+end
+
+function GltfScene:ToJsonData()
+	local jsonData = {
+		name = self._name,
+		nodes = {}
+	}
+	
+	for _, node in self._nodes do
+		table.insert(jsonData.nodes, self._exporter:GetObjectIndex(node))
+	end
+	
+	return jsonData
+end
+
+function GltfScene:Destroy()
+	self._exporter = nil
+end
+
+return GltfScene]]></ProtectedString>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="ModuleScript" referent="RBX39f1fa80f9354ca8aa404fd988e540f7">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<string name="Name">GltfMesh</string>
+						<string name="ScriptGuid">{0cea2f6e-739c-4e8a-9b72-e696ca181355}</string>
+						<ProtectedString name="Source"><![CDATA[--[[
+	A mesh is a set of primitives to be rendered.
+]]
+
+local GltfMesh = {}
+GltfMesh.__index = GltfMesh
+GltfMesh.__objectType = "GltfMesh"
+
+function GltfMesh.new()
+	local self = setmetatable({
+		_exporter = nil,
+		_name = nil,
+		_primitives = {}
+	}, GltfMesh)
+
+	return self
+end
+
+function GltfMesh:SetExporter(exporter)
+	self._exporter = exporter
+end
+
+function GltfMesh:SetName(name)
+	self._name = name
+end
+
+function GltfMesh:AddPrimitive(primitive)
+	table.insert(self._primitives, primitive)
+end
+
+function GltfMesh:ToJsonData()
+	local jsonData = {
+		name = self._name,
+		primitives = {}
+	}
+	
+	for _, primitive in self._primitives do
+		table.insert(jsonData.primitives, primitive:ToJsonData())
+	end
+
+	return jsonData
+end
+
+function GltfMesh:Destroy()
+	self._exporter = nil
+end
+
+return GltfMesh]]></ProtectedString>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="ModuleScript" referent="RBXdfd24c2b99bd472fbf1042ee8b0b316c">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<string name="Name">GltfTemplate</string>
+						<string name="ScriptGuid">{fddb53e8-e34d-488a-be32-8cc589d7cc6f}</string>
+						<ProtectedString name="Source"><![CDATA[local GltfTemplate = {}
+GltfTemplate.__index = GltfTemplate
+GltfTemplate.__objectType = "GltfTemplate"
+
+function GltfTemplate.new()
+	local self = setmetatable({
+		_exporter = nil,
+		_name = nil
+	}, GltfTemplate)
+
+	return self
+end
+
+function GltfTemplate:SetExporter(exporter)
+	self._exporter = exporter
+end
+
+function GltfTemplate:SetName(name)
+	self._name = name
+end
+
+function GltfTemplate:ToJsonData()
+	local jsonData = {
+		name = self._name,
+	}
+
+	return jsonData
+end
+
+function GltfTemplate:Destroy()
+	self._exporter = nil
+end
+
+return GltfTemplate]]></ProtectedString>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="Folder" referent="RBX9340b005cd8a489f94d302a0d58e4f2a">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<string name="Name">Helpers</string>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+					<Item class="ModuleScript" referent="RBX01458a501fa143639c8bac5659af57c4">
+						<Properties>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<Content name="LinkedSource"><null></null></Content>
+							<string name="Name">ComponentTypeEnum</string>
+							<string name="ScriptGuid">{08fa0c43-0a3b-4837-baba-255c21280ecb}</string>
+							<ProtectedString name="Source"><![CDATA[return {
+	SignedByte = 5120,
+	UnsignedByte = 5121,
+	SignedShort = 5122,
+	UnsignedShort = 5123,
+	UnsignedInt = 5125,
+	Float = 5126
+}]]></ProtectedString>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+					</Item>
+					<Item class="ModuleScript" referent="RBX649a82f98aa64c5d91b4edc190807377">
+						<Properties>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<Content name="LinkedSource"><null></null></Content>
+							<string name="Name">GetPrimitiveAccessors</string>
+							<string name="ScriptGuid">{cc2b768c-979a-4f80-8e06-00c2f2522342}</string>
+							<ProtectedString name="Source"><![CDATA[local SourceFolder = script.Parent.Parent.Parent
+
+local GltfAccessor = require(SourceFolder.Gltf.GltfAccessor)
+local GltfBufferView = require(SourceFolder.Gltf.GltfBufferView)
+local GltfBuffer = require(SourceFolder.Gltf.GltfBuffer)
+
+local LoadMesh = require(SourceFolder.Gltf.Helpers.LoadMesh)
+local ArrayToUri = require(SourceFolder.Gltf.Helpers.ArrayToUri)
+
+local TargetEnum = require(SourceFolder.Gltf.Helpers.TargetEnum)
+
+local function accessorHelper(exporter, array, arrayType)
+	local uri, count, byteSize, accessorType, componentType = ArrayToUri(array, arrayType)
+	
+	local newBuffer = GltfBuffer.new()
+	newBuffer:SetExporter(exporter)
+	newBuffer:SetByteLength(byteSize)
+	newBuffer:SetUri(uri)
+	exporter.buffers[newBuffer] = true
+	
+	local bufferView = GltfBufferView.new()
+	bufferView:SetExporter(exporter)
+	bufferView:SetByteLength(byteSize)
+	bufferView:SetBuffer(newBuffer)
+	exporter.bufferViews[bufferView] = true
+	
+	
+	local accessor = GltfAccessor.new()
+	accessor:SetExporter(exporter)
+	accessor:SetType(accessorType)
+	accessor:SetCount(count)
+	accessor:SetComponentType(componentType)
+	accessor:SetBufferView(bufferView)
+	exporter.accessors[accessor] = true
+	
+	return accessor
+end
+
+local function makeIndiciesAccessor(exporter, mesh)
+	local indiciesArray = mesh:GetTriangleIndiciesArray()
+	
+	local accessor = accessorHelper(exporter, indiciesArray, "Integer")
+	accessor._bufferView:SetTarget(TargetEnum.ElementArrayBuffer)
+	
+	return accessor
+end
+
+local function makePositionAccessor(exporter, mesh)
+	local positionArray = mesh:GetPositionArray()
+	local accessor = accessorHelper(exporter, positionArray, "Vector3")
+	
+	local max = mesh:GetMax()
+	local min = mesh:GetMin()
+	accessor:SetMax({max.X, max.Y, max.Z})
+	accessor:SetMin({min.X, min.Y, min.Z})
+	
+	return accessor
+end
+
+local function makeNormalAccessor(exporter, mesh)
+	local normalArray = mesh:GetNormalArray()
+	return accessorHelper(exporter, normalArray, "Vector3")
+end
+
+local function makeUvAccessor(exporter, mesh)
+	local uvArray = mesh:GetUvArray()
+	return accessorHelper(exporter, uvArray, "Vector2")
+end
+
+return function(exporter, identifier)
+	local meshLoaded = exporter._caches.meshLoaded[identifier:GetString()]
+	
+	local mesh
+	if not meshLoaded then
+		mesh = LoadMesh(identifier)
+	end
+	
+	local indiciesIdentifier = identifier:GetString() .. "INDICIES"
+	local indicies = exporter._caches.accessorLookup[indiciesIdentifier]
+	if indicies == nil then
+		indicies = makeIndiciesAccessor(exporter, mesh)
+		exporter._caches.accessorLookup[indiciesIdentifier] = indicies
+	end
+	
+	local attributes = {}
+	
+	local positionIdentifier = identifier:GetString() .. "POSITION"
+	local position = exporter._caches.accessorLookup[positionIdentifier]
+	if position == nil then
+		position = makePositionAccessor(exporter, mesh)
+		exporter._caches.accessorLookup[positionIdentifier] = position
+	end
+	attributes.POSITION = position
+	
+	local normalIdentifier = identifier:GetString() .. "NORMAL"
+	local normal = exporter._caches.accessorLookup[normalIdentifier]
+	if normal == nil then
+		normal = makeNormalAccessor(exporter, mesh)
+		exporter._caches.accessorLookup[normalIdentifier] = normal
+	end
+	attributes.NORMAL = normal
+	
+	local uvIdentifier = identifier:GetString() .. "TEXCOORD_0"
+	local uv = exporter._caches.accessorLookup[uvIdentifier]
+	if uv == nil then
+		uv = makeUvAccessor(exporter, mesh)
+		exporter._caches.accessorLookup[uvIdentifier] = uv
+	end
+	attributes.TEXCOORD_0 = uv
+	
+	exporter._caches.meshLoaded[identifier:GetString()] = true
+	
+	return indicies, attributes
+end]]></ProtectedString>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+					</Item>
+					<Item class="ModuleScript" referent="RBXf76db84c584048d587cfc01f8570be79">
+						<Properties>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<Content name="LinkedSource"><null></null></Content>
+							<string name="Name">ArrayToUri</string>
+							<string name="ScriptGuid">{c42f4ba7-921e-4ed7-8f0a-8a86e4770fa4}</string>
+							<ProtectedString name="Source"><![CDATA[local SourceFolder = script.Parent.Parent.Parent
+
+local ComponentTypeEnum = require(SourceFolder.Gltf.Helpers.ComponentTypeEnum)
+--[[
+	Returns uri, count, byteSize, accessorType, componentType
+]]
+
+local Base64EncodeBuffer = require(SourceFolder.Utilities.Base64EncodeBuffer)
+
+local BASE_64_PREFIX = "data:application/octet-stream;base64,"
+
+local accessorTypeToSize = {
+	SCALAR = 1,
+	VEC2 = 2,
+	VEC3 = 3,
+	VEC4 = 4,
+	MAT2 = 4,
+	MAT3 = 9,
+	MAT4 = 16
+}
+
+local typeToByteSize = {
+	[ComponentTypeEnum.SignedByte] = 1,
+	[ComponentTypeEnum.UnsignedByte] = 1,
+	[ComponentTypeEnum.SignedShort] = 2,
+	[ComponentTypeEnum.UnsignedShort] = 2,
+	[ComponentTypeEnum.UnsignedInt] = 4,
+	[ComponentTypeEnum.Float] = 4
+}
+
+local function generateUri(array, data)
+	local count = #array
+	local strideSize = accessorTypeToSize[data.accessorType] * typeToByteSize[data.componentType]
+	local byteSize = count * strideSize
+	local padding = (3 - byteSize % 3) % 3 -- Any buffer that's going to get base64 encoded should be a multiple of 3
+	
+	local arrayBuffer = buffer.create(byteSize + padding)
+	
+	for i = 1, count do
+		local offset = (i - 1) * strideSize
+		local value = array[i]
+		
+		data.writeFunction(arrayBuffer, offset, value)
+	end
+	
+	local uri = Base64EncodeBuffer(arrayBuffer, BASE_64_PREFIX)
+	
+	return uri, count, byteSize, data.accessorType, data.componentType
+end
+
+local function writeIntegerToBuffer(arrayBuffer, offset, value)
+	buffer.writeu32(arrayBuffer, offset, value)
+end
+
+local function writeFloatToBuffer(arrayBuffer, offset, value)
+	buffer.writef32(arrayBuffer, offset, value)
+end
+
+local function writeVector2ToBuffer(arrayBuffer, offset, value)
+	buffer.writef32(arrayBuffer, offset, value.x)
+	buffer.writef32(arrayBuffer, offset + 4, value.y)
+end
+
+local function writeVector3ToBuffer(arrayBuffer, offset, value)
+	buffer.writef32(arrayBuffer, offset, value.x)
+	buffer.writef32(arrayBuffer, offset + 4, value.y)
+	buffer.writef32(arrayBuffer, offset + 8, value.z)
+end
+
+local TYPE_DATA_TABLE = {
+	Integer = {writeFunction = writeIntegerToBuffer, accessorType = "SCALAR", componentType = ComponentTypeEnum.UnsignedInt},
+	Float = {writeFunction = writeFloatToBuffer, accessorType = "SCALAR", componentType = ComponentTypeEnum.Float},
+	Vector2 = {writeFunction = writeVector2ToBuffer, accessorType = "VEC2", componentType = ComponentTypeEnum.Float},
+	Vector3 = {writeFunction = writeVector3ToBuffer, accessorType = "VEC3", componentType = ComponentTypeEnum.Float},
+}
+
+return function(array, arrayType)
+	local data = TYPE_DATA_TABLE[arrayType]
+	if data == nil then return nil end
+	return generateUri(array, data)
+end]]></ProtectedString>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+					</Item>
+					<Item class="ModuleScript" referent="RBX817b1dd619514f3fb0a74da226065289">
+						<Properties>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<Content name="LinkedSource"><null></null></Content>
+							<string name="Name">LoadMesh</string>
+							<string name="ScriptGuid">{06cd1bfe-09ad-486a-9c5b-7533c122f7d8}</string>
+							<ProtectedString name="Source"><![CDATA[local SourceFolder = script.Parent.Parent.Parent
+
+local Ball = require(SourceFolder.Geometry.Constructors.Ball)
+local Block = require(SourceFolder.Geometry.Constructors.Block)
+local Cylinder = require(SourceFolder.Geometry.Constructors.Cylinder)
+local FromMeshId = require(SourceFolder.Geometry.Constructors.FromMeshId)
+local Wedge = require(SourceFolder.Geometry.Constructors.Wedge)
+
+local function blockHandler(identifier)
+	return Block(identifier:GetColor() or Color3.new())
+end
+
+local function ballHandler(identifier)
+	return Ball(identifier:GetColor() or Color3.new())
+end
+
+local function cylinderHandler(identifier)
+	return Cylinder(identifier:GetColor() or Color3.new())
+end
+
+local function meshIdHandler(identifier)
+	return FromMeshId(identifier:GetMeshId())
+end
+
+local function wedgeHandler(identifier)
+	return Wedge(identifier:GetColor() or Color3.new())
+end
+
+local SHAPE_HANDLERS = {
+	Ball = ballHandler,
+	Block = blockHandler,
+	Cylinder = cylinderHandler,
+	AssetId = meshIdHandler,
+	Wedge = wedgeHandler,
+}
+
+return function(identifier)
+	local handler = SHAPE_HANDLERS[identifier:GetShape()]
+	if handler then
+		return handler(identifier)
+	end
+end]]></ProtectedString>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+					</Item>
+					<Item class="ModuleScript" referent="RBX18043cdc3be14c348a705acd0db02bbb">
+						<Properties>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<Content name="LinkedSource"><null></null></Content>
+							<string name="Name">GetGltfMesh</string>
+							<string name="ScriptGuid">{1fc4db95-a32a-4564-98d8-89976e563422}</string>
+							<ProtectedString name="Source"><![CDATA[local SourceFolder = script.Parent.Parent.Parent
+
+local GltfMesh = require(SourceFolder.Gltf.GltfMesh)
+local GltfPrimitive = require(SourceFolder.Gltf.GltfPrimitive)
+
+local GetPrimitiveAccessors = require(SourceFolder.Gltf.Helpers.GetPrimitiveAccessors)
+local GetGltfMaterial = require(SourceFolder.Gltf.Helpers.GetGltfMaterial)
+
+
+return function(exporter, meshIdentifier, materialIdentifier)
+	local totalIdentifier = meshIdentifier:GetString() .. materialIdentifier:GetString()
+	
+	local mesh = exporter._caches.meshLookup[totalIdentifier]
+	if mesh then return mesh end
+	
+	mesh = GltfMesh.new()
+	mesh:SetExporter(exporter)
+	
+	local primitive = GltfPrimitive.new()
+	primitive:SetExporter(exporter)
+	
+	local indicies, accessors = GetPrimitiveAccessors(exporter, meshIdentifier)
+	primitive:SetIndices(indicies)
+	primitive:SetAttributes(accessors)
+	
+	local material = GetGltfMaterial(exporter, materialIdentifier)
+	primitive:SetMaterial(material)
+	
+	mesh:AddPrimitive(primitive)
+	exporter.meshes[mesh] = true
+	
+	exporter._caches.meshLookup[totalIdentifier] = mesh
+	
+	return mesh
+end]]></ProtectedString>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+					</Item>
+					<Item class="ModuleScript" referent="RBXecef15a319a5452a80d5bd8e5b6fd849">
+						<Properties>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<Content name="LinkedSource"><null></null></Content>
+							<string name="Name">TargetEnum</string>
+							<string name="ScriptGuid">{9fb44436-1a92-4c66-956d-4c22a6194354}</string>
+							<ProtectedString name="Source"><![CDATA[return {
+	ArrayBuffer = 34962,
+	ElementArrayBuffer = 34963
+}]]></ProtectedString>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+					</Item>
+					<Item class="ModuleScript" referent="RBX1ad025e5acd049a7ad80902f732428ce">
+						<Properties>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<Content name="LinkedSource"><null></null></Content>
+							<string name="Name">GetGltfMaterial</string>
+							<string name="ScriptGuid">{4bdd9f8a-ca92-48bf-9039-83346ba6ce58}</string>
+							<ProtectedString name="Source"><![CDATA[local SourceFolder = script.Parent.Parent.Parent
+
+local GltfMaterial = require(SourceFolder.Gltf.GltfMaterial)
+
+local GetGltfSimpleTexture = require(SourceFolder.Gltf.Helpers.GetGltfSimpleTexture)
+local GetGltfMetallicRoughnessTexture = function() end
+
+return function(exporter, materialIdentifier)
+	local material = exporter._caches.materialLookup[materialIdentifier:GetString()]
+	if material then return material end
+	material = GltfMaterial.new()
+	material:SetExporter(exporter)
+	material:SetColor(materialIdentifier:GetColor())
+	material:SetTransparency(materialIdentifier:GetTransparency())
+	
+	local diffuseId = materialIdentifier:GetDiffuseId()
+	if diffuseId then
+		material:SetDiffuse(GetGltfSimpleTexture(exporter, diffuseId))
+	end
+	
+	local normalId = materialIdentifier:GetNormalId()
+	if normalId then
+		material:SetNormal(GetGltfSimpleTexture(exporter, normalId))
+	end
+	
+	local metalnessId = materialIdentifier:GetMetalnessId()
+	local roughnessId = materialIdentifier:GetRoughnessId()
+	if roughnessId or metalnessId then
+		material:SetMetallicRoughness(GetGltfMetallicRoughnessTexture(exporter, diffuseId))
+	end
+	
+	exporter.materials[material] = true
+	exporter._caches.materialLookup[materialIdentifier:GetString()] = material
+	
+	return material
+end]]></ProtectedString>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+					</Item>
+					<Item class="ModuleScript" referent="RBX1fab386170444e62bd3f790e616c1247">
+						<Properties>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<Content name="LinkedSource"><null></null></Content>
+							<string name="Name">MinFilterEnum</string>
+							<string name="ScriptGuid">{150b5c2c-122a-484c-80b8-b8ab75673892}</string>
+							<ProtectedString name="Source"><![CDATA[return {
+	Nearest = 9728,
+	Linear = 9729,
+	NearestMipmapNearest = 9984,
+	LinearMipmapNearest = 9985,
+	NearestMipmapLinear= 9986,
+	LinearMipmapLinear = 9987
+}]]></ProtectedString>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+					</Item>
+					<Item class="ModuleScript" referent="RBXd8870d362ced44ba97f1e71231c0ab7b">
+						<Properties>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<Content name="LinkedSource"><null></null></Content>
+							<string name="Name">MagFilterEnum</string>
+							<string name="ScriptGuid">{5594a6b8-971f-46b0-9503-262fa1e1517f}</string>
+							<ProtectedString name="Source"><![CDATA[return {
+	Nearest = 9728,
+	Linear = 9729,
+}]]></ProtectedString>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+					</Item>
+					<Item class="ModuleScript" referent="RBX572f8a9b4c1a46eba4c7d97b94f308bc">
+						<Properties>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<Content name="LinkedSource"><null></null></Content>
+							<string name="Name">GetGltfSimpleTexture</string>
+							<string name="ScriptGuid">{d0b77c39-d09b-4f34-a1e8-e1a644d2adb9}</string>
+							<ProtectedString name="Source"><![CDATA[local SourceFolder = script.Parent.Parent.Parent
+
+local GltfMaterial = require(SourceFolder.Gltf.GltfMaterial)
+local GltfTexture = require(SourceFolder.Gltf.GltfTexture)
+local GltfImage = require(SourceFolder.Gltf.GltfImage)
+
+local GetSimpleSampler = require(SourceFolder.Gltf.Helpers.GetSimpleSampler)
+
+local PngBufferFromUri = require(SourceFolder.Image.PngBufferFromUri)
+
+local Base64EncodeBuffer = require(SourceFolder.Utilities.Base64EncodeBuffer)
+
+local BASE_64_PREFIX = "data:image/png;base64,"
+
+return function(exporter, assetId)
+	local texture = exporter._caches.textureLookup[assetId]
+	if texture then return texture end
+	
+	local imageBuffer, bufferSize = PngBufferFromUri(assetId)
+	if imageBuffer == nil then return end
+	
+	
+	texture = GltfTexture.new()
+	GltfTexture:SetExporter(exporter)
+	GltfTexture:SetSampler(GetSimpleSampler(exporter))
+	
+	local gltfImage = GltfImage.new()
+	gltfImage:SetExporter(exporter)
+	GltfImage:SetUri(Base64EncodeBuffer(imageBuffer, BASE_64_PREFIX, bufferSize))
+	--GltfImage:SetUri(BASE_64_PREFIX .. imageBuffer)
+	exporter.images[GltfImage] = true
+	
+	GltfTexture:SetSource(GltfImage)
+	
+	exporter.textures[texture] = true
+	exporter._caches.textureLookup[assetId] = texture
+	return texture
+end]]></ProtectedString>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+					</Item>
+					<Item class="ModuleScript" referent="RBX1610642c12d44fd1a24a247a8608ac00">
+						<Properties>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<Content name="LinkedSource"><null></null></Content>
+							<string name="Name">GetSimpleSampler</string>
+							<string name="ScriptGuid">{8a0d3c96-11af-4e4b-8619-5718e775bfcb}</string>
+							<ProtectedString name="Source"><![CDATA[local SourceFolder = script.Parent.Parent.Parent
+
+local GltfSampler = require(SourceFolder.Gltf.GltfSampler)
+
+local SIMPLE_SAMPLER_NAME = "Simple Sampler :)"
+
+return function(exporter)
+	local sampler = exporter._caches.samplerLookup[SIMPLE_SAMPLER_NAME]
+	if sampler then return sampler end
+	
+	sampler = GltfSampler.new()
+	sampler:SetExporter(exporter)
+
+	exporter.samplers[sampler] = true
+	exporter._caches.samplerLookup[SIMPLE_SAMPLER_NAME] = sampler
+	return sampler
+end]]></ProtectedString>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+					</Item>
+				</Item>
+				<Item class="ModuleScript" referent="RBXad8372dd271045a2b710b0f17f1c8b04">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<string name="Name">GltfPrimitive</string>
+						<string name="ScriptGuid">{0de6f982-4814-4d62-b8f8-cadbdd440cf7}</string>
+						<ProtectedString name="Source"><![CDATA[local GltfPrimitive = {}
+GltfPrimitive.__index = GltfPrimitive
+GltfPrimitive.__objectType = "GltfPrimitive"
+
+function GltfPrimitive.new()
+	local self = setmetatable({
+		_exporter = nil,
+		_attributes = {},
+		_material = nil,
+		_indices = nil
+	}, GltfPrimitive)
+
+	return self
+end
+
+function GltfPrimitive:SetExporter(exporter)
+	self._exporter = exporter
+end
+
+function GltfPrimitive:SetMaterial(material)
+	self._material = material
+end
+
+function GltfPrimitive:SetIndices(indices)
+	self._indices = indices
+end
+
+function GltfPrimitive:AddAttribute(attributeName, value)
+	self._attributes[attributeName] = value
+end
+
+function GltfPrimitive:SetAttributes(attributes)
+	self._attributes = attributes
+end
+
+function GltfPrimitive:ToJsonData()
+	local jsonData = {
+		name = self._name,
+		mode = 4, -- 4 for triangles: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#schema-reference-mesh-primitive
+		indices = self._exporter:GetObjectIndex(self._indices),
+		attributes = {}
+	}
+	
+	if self._material then
+		jsonData.material = self._exporter:GetObjectIndex(self._material)
+	end
+	
+	for name, value in self._attributes do
+		jsonData.attributes[name] = self._exporter:GetObjectIndex(value)
+	end
+
+	return jsonData
+end
+
+function GltfPrimitive:Destroy()
+	self._exporter = nil
+end
+
+return GltfPrimitive]]></ProtectedString>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="ModuleScript" referent="RBXe209db6948d14baa99f0fbbba0d7c2df">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<string name="Name">GltfAccessor</string>
+						<string name="ScriptGuid">{ea701f93-1a10-4cc8-9604-f7927574e57d}</string>
+						<ProtectedString name="Source"><![CDATA[--[[
+	An accessor is a typed view into a bufferView.
+	
+	The type may be one of: "SCALAR", "VEC2", "VEC3", "VEC4", "MAT2", "MAT3", "MAT4", "string"
+]]
+
+local SourceFolder = script.Parent.Parent
+
+local ComponentTypeEnum = require(SourceFolder.Gltf.Helpers.ComponentTypeEnum)
+
+local GltfAccessor = {}
+GltfAccessor.__index = GltfAccessor
+GltfAccessor.__objectType = "GltfAccessor"
+
+function GltfAccessor.new()
+	local self = setmetatable({
+		_name = nil,
+		_exporter = nil,
+		_count = 0,
+		_type = "SCALAR",
+		_min = nil,
+		_max = nil,
+		_componentType = ComponentTypeEnum.Float,
+		_bufferView = nil,
+		_target = 34962
+	}, GltfAccessor)
+
+	return self
+end
+
+function GltfAccessor:SetExporter(exporter)
+	self._exporter = exporter
+end
+
+function GltfAccessor:SetName(name)
+	self._name = name
+end
+
+function GltfAccessor:SetComponentType(componentType)
+	self._componentType = componentType
+end
+
+function GltfAccessor:SetType(accessorType)
+	self._type = accessorType
+end
+
+function GltfAccessor:SetCount(count)
+	self._count = count
+end
+
+function GltfAccessor:SetMin(min)
+	self._min = min
+end
+
+function GltfAccessor:SetMax(max)
+	self._max = max
+end
+
+function GltfAccessor:SetBufferView(bufferView)
+	self._bufferView = bufferView
+end
+
+function GltfAccessor:ToJsonData()
+	local jsonData = {
+		name = self._name,
+		type = self._type,
+		componentType = self._componentType,
+		bufferView = self._exporter:GetObjectIndex(self._bufferView),
+		count = self._count,
+		min = self._min,
+		max = self._max,
+	}
+
+	return jsonData
+end
+
+function GltfAccessor:Destroy()
+	self._exporter = nil
+end
+
+return GltfAccessor]]></ProtectedString>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="ModuleScript" referent="RBXa0e0524d95c84642b506c9a4e7adb8df">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<string name="Name">GltfBufferView</string>
+						<string name="ScriptGuid">{a50bf519-84d8-429f-8ac4-ecacc1583569}</string>
+						<ProtectedString name="Source"><![CDATA[local SourceFolder = script.Parent.Parent
+
+local TargetEnum = require(SourceFolder.Gltf.Helpers.TargetEnum)
+
+local GltfBufferView = {}
+GltfBufferView.__index = GltfBufferView
+GltfBufferView.__objectType = "GltfBufferView"
+
+function GltfBufferView.new()
+	local self = setmetatable({
+		_exporter = nil,
+		_name = nil,
+		_byteLength = 0,
+		_buffer = nil,
+		_target = TargetEnum.ArrayBuffer
+	}, GltfBufferView)
+
+	return self
+end
+
+function GltfBufferView:SetExporter(exporter)
+	self._exporter = exporter
+end
+
+function GltfBufferView:SetName(name)
+	self._name = name
+end
+
+function GltfBufferView:SetTarget(target)
+	self._target = target
+end
+
+function GltfBufferView:SetBuffer(bufferObject)
+	self._buffer = bufferObject
+end
+
+function GltfBufferView:SetByteLength(byteLength)
+	self._byteLength = byteLength
+end
+
+function GltfBufferView:ToJsonData()
+	local jsonData = {
+		name = self._name,
+		byteLength = self._byteLength,
+		buffer = self._exporter:GetObjectIndex(self._buffer),
+		target = self._target
+	}
+
+	return jsonData
+end
+
+function GltfBufferView:Destroy()
+	self._exporter = nil
+end
+
+return GltfBufferView]]></ProtectedString>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="ModuleScript" referent="RBX37f7a1d8170044858c1dda8b8b56c537">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<string name="Name">GltfBuffer</string>
+						<string name="ScriptGuid">{7dd5bba5-e181-4f9f-85e0-7290877f8a0d}</string>
+						<ProtectedString name="Source"><![CDATA[local GltfBuffer = {}
+GltfBuffer.__index = GltfBuffer
+GltfBuffer.__objectType = "GltfBuffer"
+
+function GltfBuffer.new()
+	local self = setmetatable({
+		_exporter = nil,
+		_name = nil,
+		_uri = "",
+		_byteLength = 0
+	}, GltfBuffer)
+
+	return self
+end
+
+function GltfBuffer:SetExporter(exporter)
+	self._exporter = exporter
+end
+
+function GltfBuffer:SetName(name)
+	self._name = name
+end
+
+function GltfBuffer:SetUri(uri)
+	self._uri = uri
+end
+
+function GltfBuffer:SetByteLength(byteLength)
+	self._byteLength = byteLength
+end
+
+function GltfBuffer:ToJsonData()
+	local jsonData = {
+		name = self._name,
+		uri = self._uri,
+		byteLength = self._byteLength
+	}
+
+	return jsonData
+end
+
+function GltfBuffer:Destroy()
+	self._exporter = nil
+end
+
+return GltfBuffer]]></ProtectedString>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="Folder" referent="RBX6b1913cd4d104bb18f4eca93dec29c0f">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<string name="Name">Identifiers</string>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+					<Item class="ModuleScript" referent="RBX8260f775c9ab48ff8870fc875cf7b2f1">
+						<Properties>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<Content name="LinkedSource"><null></null></Content>
+							<string name="Name">MeshIdentifier</string>
+							<string name="ScriptGuid">{e213767b-8712-4555-a81b-be5fcbea66cb}</string>
+							<ProtectedString name="Source"><![CDATA[--[[
+	MeshIdentifier is used for loading metadata and deduplication
+	the idea is that for any two given parts with geometry, if their MeshIdentifier._string is the same then the share the same mesh
+]]
+
+local SourceFolder = script.Parent.Parent.Parent
+
+local RemoveNils = require(SourceFolder.Utilities.RemoveNils)
+
+local MeshIdentifier = {}
+MeshIdentifier.__index = MeshIdentifier
+MeshIdentifier.__objectType = "MeshIdentifier"
+
+function MeshIdentifier.new(instance)
+	local self = setmetatable({
+		_instance = instance,
+		_string = nil,
+		_colorString = "",
+		_shape = nil,
+		_color = nil,
+		_meshId = nil,
+	}, MeshIdentifier)
+	
+	self:_generate()
+
+	return self
+end
+
+local PART_TYPE_TO_SHAPE = {
+	[Enum.PartType.Block] = "Block",
+	[Enum.PartType.Wedge] = "Wedge",
+	[Enum.PartType.Cylinder] = "Cylinder",
+	[Enum.PartType.Ball] = "Ball",
+	[Enum.PartType.CornerWedge] = "CornerWedge",
+}
+
+local function getShapeFromInstance(instance)
+	if instance:IsA("MeshPart") then
+		return "AssetId"
+	end
+	
+	if instance:IsA("BasePart") then
+		-- TODO: Check for special meshes
+		if instance:IsA("Part") then
+			return PART_TYPE_TO_SHAPE[instance.Shape]
+		end
+	end
+end
+
+local function getColorFromInstance(instance : Instance)
+	if instance:IsA("BasePart") then
+		return instance.Color
+	end
+end
+
+local function getAssetIdFromInstance(instance : Instance)
+	if instance:IsA("MeshPart") then
+		return instance.MeshId
+	end
+end
+
+--[[
+	Currently supported shapes:
+		Block, Ball, CornerWedge, Wedge, Cylinder, AssetId
+]]
+
+function MeshIdentifier:_generate()
+	self._shape = getShapeFromInstance(self._instance)
+	
+	if not self._shape then return end
+	
+	if self._shape == "AssetId" then
+		self._meshId = getAssetIdFromInstance(self._instance)
+	end
+	
+	self._color = getColorFromInstance(self._instance)
+	if self._color then
+		self._colorString = table.concat({"{", tostring(self._color), "}"})
+	end
+	
+	-- This can be extended later with more complex logic if needed
+	self._string = table.concat(RemoveNils({self._shape, self._meshId}))
+end
+
+function MeshIdentifier:GetMeshId()
+	return self._meshId
+end
+
+function MeshIdentifier:GetString()
+	return self._string
+end
+
+function MeshIdentifier:GetColorString()
+	return self._colorString
+end
+
+function MeshIdentifier:GetStringWithColor()
+	return self._string .. self._colorString
+end
+
+function MeshIdentifier:GetShape()
+	return self._shape
+end
+
+function MeshIdentifier:GetColor()
+	return self._color
+end
+function MeshIdentifier:Destroy()
+	self._instance = nil
+end
+
+return MeshIdentifier]]></ProtectedString>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+					</Item>
+					<Item class="ModuleScript" referent="RBX832dad805511499c88528a4bc7065c33">
+						<Properties>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<Content name="LinkedSource"><null></null></Content>
+							<string name="Name">MaterialIdentifier</string>
+							<string name="ScriptGuid">{fb8828ee-7ed3-4049-a0ae-9697e0a9dcf6}</string>
+							<ProtectedString name="Source"><![CDATA[--[[
+	MaterialIdentifier is used for loading metadata and deduplication
+	the idea is that for any two given instances, if their MaterialIdentifier._string is the same then the share the same material
+]]
+
+local SourceFolder = script.Parent.Parent.Parent
+
+local RemoveNils = require(SourceFolder.Utilities.RemoveNils)
+
+local MaterialIdentifier = {}
+MaterialIdentifier.__index = MaterialIdentifier
+MaterialIdentifier.__objectType = "MaterialIdentifier"
+
+function MaterialIdentifier.new(instance)
+	local self = setmetatable({
+		_instance = instance,
+		_string = nil,
+		_doubleSided = nil,
+		_color = nil,
+		_diffuseId = nil,
+		_normalId = nil,
+		_metalnessId = nil,
+		_roughnessId = nil,
+		_alphaMode = nil,
+		_transparency = 0,
+	}, MaterialIdentifier)
+
+	self:_generate()
+
+	return self
+end
+
+local function assetIdOrNil(value)
+	return if string.len(value) > 0 then value else nil
+end
+
+local function stringOrNil(resultString, value)
+	if value then
+		return resultString
+	end
+end
+
+local ALPHA_MODE_STRING = {
+	[Enum.AlphaMode.Transparency] = "Transparency",
+	[Enum.AlphaMode.Overlay] = "Overlay"
+}
+
+function MaterialIdentifier:_generateForSurfaceAppearance(surfaceAppearance : SurfaceAppearance)
+	self._diffuseId = assetIdOrNil(surfaceAppearance.ColorMap)
+	self._normalId = assetIdOrNil(surfaceAppearance.NormalMap)
+	self._metalnessId = assetIdOrNil(surfaceAppearance.MetalnessMap)
+	self._roughnessId = assetIdOrNil(surfaceAppearance.RoughnessMap)
+	self._alphaMode = ALPHA_MODE_STRING[surfaceAppearance.AlphaMode]
+end
+
+function MaterialIdentifier:_generate()
+	if self._instance:IsA("BasePart") then
+		local basePart : BasePart = self._instance
+		self._color = basePart.Color
+		self._transparency = basePart.Transparency
+		
+		if basePart:IsA("MeshPart") then
+			self._diffuseId = assetIdOrNil(basePart.TextureID)
+			self._doubleSided = true
+			
+			local surfaceAppearance = basePart:FindFirstChildWhichIsA("SurfaceAppearance", false)
+			if surfaceAppearance then
+				self:_generateForSurfaceAppearance(surfaceAppearance)
+			end
+		end
+	elseif self._instance:IsA("Decal")  then
+		warn("Decals not handled yet")
+		return
+	else
+		return
+	end
+	
+	self._string = table.concat(RemoveNils({
+		self:GetColorString(),
+		stringOrNil("DoubleSided", self._doubleSided),
+		self._transparency,
+		self._diffuseId,
+		self._normalId,
+		self._metalnessId,
+		self._roughnessId,
+		self._alphaMode
+	}))
+	
+end
+
+
+function MaterialIdentifier:GetString()
+	return self._string
+end
+
+function MaterialIdentifier:GetColorString()
+	if not self._color then return nil end
+	return table.concat({"{", tostring(self._color), "}"})
+end
+
+function MaterialIdentifier:GetColor()
+	return self._color
+end
+
+function MaterialIdentifier:GetTransparency()
+	return self._transparency
+end
+
+function MaterialIdentifier:GetDiffuseId()
+	return self._diffuseId
+end
+
+function MaterialIdentifier:GetNormalId()
+	return self._normalId
+end
+
+function MaterialIdentifier:GetMetalnessId()
+	return self._metalnessId
+end
+
+function MaterialIdentifier:GetRoughnessId()
+	return self._roughnessId
+end
+
+
+
+function MaterialIdentifier:Destroy()
+	self._instance = nil
+end
+
+return MaterialIdentifier]]></ProtectedString>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+					</Item>
+				</Item>
+				<Item class="ModuleScript" referent="RBXfff656e860bc4999949f92b667a52175">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<string name="Name">GltfMaterial</string>
+						<string name="ScriptGuid">{372174c4-7d96-41dc-be03-b29664558f67}</string>
+						<ProtectedString name="Source"><![CDATA[local GltfMaterial = {}
+GltfMaterial.__index = GltfMaterial
+GltfMaterial.__objectType = "GltfMaterial"
+
+function GltfMaterial.new()
+	local self = setmetatable({
+		_exporter = nil,
+		_name = nil,
+		_diffuse = nil,
+		_color = nil,
+		_normal = nil,
+		_metallicRoughness = nil,
+		_doubleSided = false,
+		_metallicFactor = 0,
+		_roughnessFactor = 0.5,
+		_transparency = 0,
+	}, GltfMaterial)
+
+	return self
+end
+
+function GltfMaterial:SetExporter(exporter)
+	self._exporter = exporter
+end
+
+function GltfMaterial:SetName(name)
+	self._name = name
+end
+
+function GltfMaterial:SetColor(color)
+	self._color = color
+end
+
+function GltfMaterial:SetTransparency(transparency)
+	self._transparency = transparency
+end
+
+function GltfMaterial:SetDiffuse(diffuse)
+	self._diffuse = diffuse
+end
+
+function GltfMaterial:SetNormal(normal)
+	self._normal = normal
+end
+
+function GltfMaterial:SetMetallicRoughness(metallicRoughness)
+	self._metallicRoughness = metallicRoughness
+end
+
+function GltfMaterial:ToJsonData()
+	local jsonData = {
+		name = self._name,
+		doubleSided  = self._doubleSided,
+		pbrMetallicRoughness = {}
+	}
+	
+	if self._diffuse == nil then
+		jsonData.pbrMetallicRoughness.baseColorFactor = {
+			self._color.r,
+			self._color.g,
+			self._color.b,
+			1 - self._transparency
+		}
+	else
+		jsonData.pbrMetallicRoughness.baseColorTexture = {
+			index = self._exporter:GetObjectIndex(self._diffuse)
+		}
+	end
+	
+	if self._normal ~= nil then
+		jsonData.normalTexture = {
+			index = self._exporter:GetObjectIndex(self._normal)
+		}
+	end
+	
+	if self._metallicRoughness == nil then
+		jsonData.pbrMetallicRoughness.metallicFactor = self._metallicFactor
+		jsonData.pbrMetallicRoughness.roughnessFactor = self._roughnessFactor
+	else
+		jsonData.pbrMetallicRoughness.metallicRoughnessTexture = {
+			index = self._exporter:GetObjectIndex(self._metallicRoughness)
+		}
+	end
+
+	return jsonData
+end
+
+function GltfMaterial:Destroy()
+	self._exporter = nil
+	self._diffuse = nil
+	self._normal = nil
+	self._metallicRoughness = nil
+end
+
+return GltfMaterial]]></ProtectedString>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="ModuleScript" referent="RBX1df92474268e4773af0e4a2f34b007b5">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<string name="Name">GltfTexture</string>
+						<string name="ScriptGuid">{30a91bac-348e-4c61-8caa-ab7672189564}</string>
+						<ProtectedString name="Source"><![CDATA[local GltfTexture = {}
+GltfTexture.__index = GltfTexture
+GltfTexture.__objectType = "GltfTexture"
+
+function GltfTexture.new()
+	local self = setmetatable({
+		_exporter = nil,
+		_sampler = nil,
+		_source = nil,
+	}, GltfTexture)
+
+	return self
+end
+
+function GltfTexture:SetExporter(exporter)
+	self._exporter = exporter
+end
+
+function GltfTexture:SetSampler(sampler)
+	self._sampler = sampler
+end
+
+function GltfTexture:SetSource(source)
+	self._source = source
+end
+
+function GltfTexture:ToJsonData()
+	local jsonData = {
+		sampler = self._exporter:GetObjectIndex(self._sampler),
+		source = self._exporter:GetObjectIndex(self._source),
+	}
+
+	return jsonData
+end
+
+function GltfTexture:Destroy()
+	self._exporter = nil
+	self._sampler = nil
+	self._source = nil
+end
+
+return GltfTexture]]></ProtectedString>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="ModuleScript" referent="RBXe22525194efd4a0bb2e4bb79707aecb4">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<string name="Name">GltfImage</string>
+						<string name="ScriptGuid">{f7907c8b-1c8f-4130-9a13-58614e49ebec}</string>
+						<ProtectedString name="Source"><![CDATA[local GltfImage = {}
+GltfImage.__index = GltfImage
+GltfImage.__objectType = "GltfImage"
+
+function GltfImage.new()
+	local self = setmetatable({
+		_exporter = nil,
+		_name = nil,
+		_mimeType = nil,
+		_uri = nil
+	}, GltfImage)
+
+	return self
+end
+
+function GltfImage:SetExporter(exporter)
+	self._exporter = exporter
+end
+
+function GltfImage:SetName(name)
+	self._name = name
+end
+
+function GltfImage:SetMimeType(mimeType)
+	self._mimeType = mimeType
+end
+
+function GltfImage:SetUri(uri)
+	self._uri = uri
+end
+
+function GltfImage:ToJsonData()
+	local jsonData = {
+		name = self._name,
+		mimeType = self._mimeType,
+		uri = self._uri,
+	}
+
+	return jsonData
+end
+
+function GltfImage:Destroy()
+	self._exporter = nil
+end
+
+return GltfImage]]></ProtectedString>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="ModuleScript" referent="RBXbd7aff55cbb34c3784dc84f9d01c8e3c">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<string name="Name">GltfSampler</string>
+						<string name="ScriptGuid">{96672018-dee3-4f52-b6ee-49d38c521d8f}</string>
+						<ProtectedString name="Source"><![CDATA[local SourceFolder = script.Parent.Parent
+
+local MagFilterEnum = require(SourceFolder.Gltf.Helpers.MagFilterEnum)
+local MinFilterEnum = require(SourceFolder.Gltf.Helpers.MinFilterEnum)
+
+local GltfSampler = {}
+GltfSampler.__index = GltfSampler
+GltfSampler.__objectType = "GltfSampler"
+
+function GltfSampler.new()
+	local self = setmetatable({
+		_exporter = nil,
+		_magFilter = MagFilterEnum.Linear,
+		_minFilter = MinFilterEnum.LinearMipmapLinear,
+	}, GltfSampler)
+
+	return self
+end
+
+function GltfSampler:SetExporter(exporter)
+	self._exporter = exporter
+end
+
+function GltfSampler:ToJsonData()
+	local jsonData = {
+		name = self._name,
+		magFilter = self._magFilter,
+		minFilter = self._minFilter
+	}
+
+	return jsonData
+end
+
+function GltfSampler:Destroy()
+	self._exporter = nil
+end
+
+return GltfSampler]]></ProtectedString>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+			</Item>
+			<Item class="Folder" referent="RBX9f4a15c506c046668cdbacecc9f5c669">
+				<Properties>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+					<bool name="DefinesCapabilities">false</bool>
+					<string name="Name">Image</string>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+				</Properties>
+				<Item class="ModuleScript" referent="RBXe77380365f9e459aafb68c34f3c65b64">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<string name="Name">PngEncoder</string>
+						<string name="ScriptGuid">{e74c26dd-be82-4236-882c-abd39953f7f2}</string>
+						<ProtectedString name="Source"><![CDATA[--[[
+	Addapted from https://github.com/wyozi/lua-pngencoder/tree/master
+		Which in turn addapted https://www.nayuki.io/page/tiny-png-output
+	
+	This whole thing can be made wayyy more efficent with more buffer usage
+]]
+
+local PngEncoder = {}
+PngEncoder.__index = PngEncoder
+
+local DEFLATE_MAX_BLOCK_SIZE = 65535
+
+local function putBigUint32(val, tbl, index)
+	for i=0,3 do
+		tbl[index + i] = bit32.band(bit32.rshift(val, (3 - i) * 8), 0xFF)
+	end
+end
+
+function PngEncoder:writeBytes(data, index, length)
+	index = index or 1
+	length = length or #data
+	for i = index, index + length - 1 do
+		buffer.writeu8(self.outBuffer, self.offset, data[i])
+		self.offset += 1
+	end
+end
+
+function PngEncoder:write(pixels)
+	local count = #pixels  -- Byte count
+	local pixelPointer = 1
+	while count > 0 do
+		if self.positionY >= self.height then
+			error("All image pixels already written")
+		end
+
+		if self.deflateFilled == 0 then -- Start DEFLATE block
+			local size = DEFLATE_MAX_BLOCK_SIZE
+			if (self.uncompRemain < size) then
+				size = self.uncompRemain
+			end
+			local header = {  -- 5 bytes long
+				bit32.band((self.uncompRemain <= DEFLATE_MAX_BLOCK_SIZE and 1 or 0), 0xFF),
+				bit32.band(bit32.rshift(size, 0), 0xFF),
+				bit32.band(bit32.rshift(size, 8), 0xFF),
+				bit32.band(bit32.bxor(bit32.rshift(size, 0), 0xFF), 0xFF),
+				bit32.band(bit32.bxor(bit32.rshift(size, 8), 0xFF), 0xFF),
+			}
+			self:writeBytes(header)
+			self:crc32(header, 1, #header)
+		end
+		assert(self.positionX < self.lineSize and self.deflateFilled < DEFLATE_MAX_BLOCK_SIZE)
+
+		if (self.positionX == 0) then  -- Beginning of line - write filter method byte
+			local b = {0}
+			self:writeBytes(b)
+			self:crc32(b, 1, 1)
+			self:adler32(b, 1, 1)
+			self.positionX = self.positionX + 1
+			self.uncompRemain = self.uncompRemain - 1
+			self.deflateFilled = self.deflateFilled + 1
+		else -- Write some pixel bytes for current line
+			local n = DEFLATE_MAX_BLOCK_SIZE - self.deflateFilled
+			if (self.lineSize - self.positionX < n) then
+				n = self.lineSize - self.positionX
+			end
+			if (count < n) then
+				n = count
+			end
+			assert(n > 0)
+
+			self:writeBytes(pixels, pixelPointer, n)
+
+			-- Update checksums
+			self:crc32(pixels, pixelPointer, n)
+			self:adler32(pixels, pixelPointer, n)
+
+			-- Increment positions
+			count = count - n
+			pixelPointer = pixelPointer + n
+			self.positionX = self.positionX + n
+			self.uncompRemain = self.uncompRemain - n
+			self.deflateFilled = self.deflateFilled + n
+		end
+
+		if (self.deflateFilled >= DEFLATE_MAX_BLOCK_SIZE) then
+			self.deflateFilled = 0 -- End current block
+		end
+
+		if (self.positionX == self.lineSize) then  -- Increment line
+			self.positionX = 0
+			self.positionY = self.positionY + 1
+			if (self.positionY == self.height) then -- Reached end of pixels
+				local footer = {  -- 20 bytes long
+					0, 0, 0, 0,  -- DEFLATE Adler-32 placeholder
+					0, 0, 0, 0,  -- IDAT CRC-32 placeholder
+					-- IEND chunk
+					0x00, 0x00, 0x00, 0x00,
+					0x49, 0x45, 0x4E, 0x44,
+					0xAE, 0x42, 0x60, 0x82,
+				}
+				putBigUint32(self.adler, footer, 1)
+				self:crc32(footer, 1, 4)
+				putBigUint32(self.crc, footer, 5)
+				self:writeBytes(footer)
+				self.done = true
+			end
+		end
+	end
+end
+
+function PngEncoder:crc32(data, index, len)
+	self.crc = bit32.bnot(self.crc)
+	for i = index, index + len - 1 do
+		local byte = data[i]
+		for j = 0, 7 do  -- Inefficient bitwise implementation, instead of table-based
+			local nbit = bit32.band(bit32.bxor(self.crc, bit32.rshift(byte, j)), 1)
+			self.crc = bit32.bxor(bit32.rshift(self.crc, 1), bit32.band((-nbit), 0xEDB88320))
+		end
+	end
+	self.crc = bit32.bnot(self.crc)
+end
+function PngEncoder:adler32(data, index, len)
+	local s1 = bit32.band(self.adler, 0xFFFF)
+	local s2 = bit32.rshift(self.adler, 16)
+	for i = index, index + len - 1 do
+		s1 = (s1 + data[i]) % 65521
+		s2 = (s2 + s1) % 65521
+	end
+	self.adler = bit32.bor(bit32.lshift(s2, 16), s1)
+end
+
+function PngEncoder.new(width, height, colorMode)
+	local self = setmetatable({
+		width = width,
+		height = height,
+		done = false,
+		outBuffer = buffer.create(1024 * 1024 * 4 + 2048 * 4), -- 2048 * 4 just so we have some... 'buffer' ;)
+		offset = 0,
+	}, PngEncoder)
+	-- Default to rgb
+	colorMode = colorMode or "rgb"
+
+	-- Determine bytes per pixel and the PNG internal color type
+	local bytesPerPixel, colorType
+	if colorMode == "rgb" then
+		bytesPerPixel, colorType = 3, 2
+	elseif colorMode == "rgba" then
+		bytesPerPixel, colorType = 4, 6
+	else
+		error("Invalid colorMode")
+	end
+
+	-- Compute and check data siezs
+	self.lineSize = width * bytesPerPixel + 1
+	-- TODO: check if lineSize too big
+
+	self.uncompRemain = self.lineSize * height
+
+	local numBlocks = math.ceil(self.uncompRemain / DEFLATE_MAX_BLOCK_SIZE)
+
+	-- 5 bytes per DEFLATE uncompressed block header, 2 bytes for zlib header, 4 bytes for zlib Adler-32 footer
+	local idatSize = numBlocks * 5 + 6
+	idatSize = idatSize + self.uncompRemain
+
+	-- TODO check if idatSize too big
+
+	local header = {  -- 43 bytes long
+		-- PNG header
+		0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
+		-- IHDR chunk
+		0x00, 0x00, 0x00, 0x0D,
+		0x49, 0x48, 0x44, 0x52,
+		0, 0, 0, 0,  -- 'width' placeholder
+		0, 0, 0, 0,  -- 'height' placeholder
+		0x08, colorType, 0x00, 0x00, 0x00,
+		0, 0, 0, 0,  -- IHDR CRC-32 placeholder
+		-- IDAT chunk
+		0, 0, 0, 0,  -- 'idatSize' placeholder
+		0x49, 0x44, 0x41, 0x54,
+		-- DEFLATE data
+		0x08, 0x1D,
+	}
+	putBigUint32(width, header, 17)
+	putBigUint32(height, header, 21)
+	putBigUint32(idatSize, header, 34)
+
+	self.crc = 0
+	self:crc32(header, 13, 17)
+	putBigUint32(self.crc, header, 30)
+	self:writeBytes(header)
+
+	self.crc = 0
+	self:crc32(header, 38, 6)  -- 0xD7245B6B
+	self.adler = 1
+
+	self.positionX = 0
+	self.positionY = 0
+	self.deflateFilled = 0
+
+	return self
+end
+
+return PngEncoder]]></ProtectedString>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="ModuleScript" referent="RBXee87d929c2c241259442543ed8338076">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<string name="Name">PngBufferFromUri</string>
+						<string name="ScriptGuid">{b0b99b00-d8e7-49a0-9476-995cbbff1496}</string>
+						<ProtectedString name="Source"><![CDATA[local SourceFolder = script.Parent.Parent
+
+local PngEncoder = require(SourceFolder.Image.PngEncoder)
+
+local AssetService = game:GetService("AssetService")
+
+return function(uri)
+	local content = Content.fromUri(uri)
+	local editableImage = AssetService:CreateEditableImageAsync(content)
+
+	local size = editableImage.Size
+
+	if size.X == 0 or size.Y == 0 then return end
+	
+	local encoder = PngEncoder.new(size.X, size.Y)
+	
+	local pixelsBuffer = editableImage:ReadPixelsBuffer(Vector2.zero, editableImage.Size)
+	for index = 1, size.X * size.Y * 4, 4 do
+		encoder:write({
+			buffer.readu8(pixelsBuffer, index - 1),
+			buffer.readu8(pixelsBuffer, index),
+			buffer.readu8(pixelsBuffer, index + 1)
+		})
+	end
+	
+	local byteSize = encoder.offset
+	local padding = (3 - byteSize % 3) % 3
+	
+	return encoder.outBuffer, byteSize + padding
+end]]></ProtectedString>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+			</Item>
+		</Item>
+		<Item class="Script" referent="RBX79b4b64ce39d4b0db9cf51561312b9d8">
+			<Properties>
+				<BinaryString name="AttributesSerialize"></BinaryString>
+				<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+				<bool name="DefinesCapabilities">false</bool>
+				<bool name="Disabled">false</bool>
+				<Content name="LinkedSource"><null></null></Content>
+				<string name="Name">Plugin</string>
+				<token name="RunContext">0</token>
+				<string name="ScriptGuid">{65143681-5a93-4384-afca-009437f6eed3}</string>
+				<ProtectedString name="Source"><![CDATA[local GltfExporter = require(script.Parent.Source.Gltf.GltfExporter)
+
+local HttpService = game:GetService("HttpService")
+
+local CHUNK_LENGTH = 20000
+local SERVER_ADDRESS = "http://localhost:8080"
+
+local function exportWorkspace()
+	print("Exporting Workspace...")
+	local exporter = GltfExporter.new()
+	exporter:populateScene("Workspace", game.Workspace)
+	
+	local result = exporter:WriteToJson()
+	
+	local chunkCount = math.ceil(string.len(result) / CHUNK_LENGTH)
+	print(chunkCount)
+	
+	for i = 1, chunkCount do
+		local chunk = string.sub(result, (i - 1) * CHUNK_LENGTH + 1, i * CHUNK_LENGTH)
+		HttpService:PostAsync(SERVER_ADDRESS, chunk, Enum.HttpContentType.TextPlain, false, {chunkType = "content"})
+	end
+	
+	HttpService:PostAsync(SERVER_ADDRESS, "n/a", Enum.HttpContentType.TextPlain, false, {chunkType = "complete"})
+	
+	exporter:Destroy()
+	
+	print("Done")
+end
+
+local toolbar = plugin:CreateToolbar("Export")
+local button = toolbar:CreateButton("Export To glTF", "Exports your scene to a script file in game.ServerStorage", "")
+
+button.Click:Connect(exportWorkspace)]]></ProtectedString>
+				<int64 name="SourceAssetId">-1</int64>
+				<BinaryString name="Tags"></BinaryString>
+			</Properties>
+		</Item>
+	</Item>
+</roblox>

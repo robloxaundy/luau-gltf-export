@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "ArrayToUri",
+ "referent": "RBXf76db84c584048d587cfc01f8570be79",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "ArrayToUri"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{c42f4ba7-921e-4ed7-8f0a-8a86e4770fa4}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local SourceFolder = script.Parent.Parent.Parent\n\nlocal ComponentTypeEnum = require(SourceFolder.Gltf.Helpers.ComponentTypeEnum)\n--[[\n\tReturns uri, count, byteSize, accessorType, componentType\n]]\n\nlocal Base64EncodeBuffer = require(SourceFolder.Utilities.Base64EncodeBuffer)\n\nlocal BASE_64_PREFIX = \"data:application/octet-stream;base64,\"\n\nlocal accessorTypeToSize = {\n\tSCALAR = 1,\n\tVEC2 = 2,\n\tVEC3 = 3,\n\tVEC4 = 4,\n\tMAT2 = 4,\n\tMAT3 = 9,\n\tMAT4 = 16\n}\n\nlocal typeToByteSize = {\n\t[ComponentTypeEnum.SignedByte] = 1,\n\t[ComponentTypeEnum.UnsignedByte] = 1,\n\t[ComponentTypeEnum.SignedShort] = 2,\n\t[ComponentTypeEnum.UnsignedShort] = 2,\n\t[ComponentTypeEnum.UnsignedInt] = 4,\n\t[ComponentTypeEnum.Float] = 4\n}\n\nlocal function generateUri(array, data)\n\tlocal count = #array\n\tlocal strideSize = accessorTypeToSize[data.accessorType] * typeToByteSize[data.componentType]\n\tlocal byteSize = count * strideSize\n\tlocal padding = (3 - byteSize % 3) % 3 -- Any buffer that's going to get base64 encoded should be a multiple of 3\n\t\n\tlocal arrayBuffer = buffer.create(byteSize + padding)\n\t\n\tfor i = 1, count do\n\t\tlocal offset = (i - 1) * strideSize\n\t\tlocal value = array[i]\n\t\t\n\t\tdata.writeFunction(arrayBuffer, offset, value)\n\tend\n\t\n\tlocal uri = Base64EncodeBuffer(arrayBuffer, BASE_64_PREFIX)\n\t\n\treturn uri, count, byteSize, data.accessorType, data.componentType\nend\n\nlocal function writeIntegerToBuffer(arrayBuffer, offset, value)\n\tbuffer.writeu32(arrayBuffer, offset, value)\nend\n\nlocal function writeFloatToBuffer(arrayBuffer, offset, value)\n\tbuffer.writef32(arrayBuffer, offset, value)\nend\n\nlocal function writeVector2ToBuffer(arrayBuffer, offset, value)\n\tbuffer.writef32(arrayBuffer, offset, value.x)\n\tbuffer.writef32(arrayBuffer, offset + 4, value.y)\nend\n\nlocal function writeVector3ToBuffer(arrayBuffer, offset, value)\n\tbuffer.writef32(arrayBuffer, offset, value.x)\n\tbuffer.writef32(arrayBuffer, offset + 4, value.y)\n\tbuffer.writef32(arrayBuffer, offset + 8, value.z)\nend\n\nlocal TYPE_DATA_TABLE = {\n\tInteger = {writeFunction = writeIntegerToBuffer, accessorType = \"SCALAR\", componentType = ComponentTypeEnum.UnsignedInt},\n\tFloat = {writeFunction = writeFloatToBuffer, accessorType = \"SCALAR\", componentType = ComponentTypeEnum.Float},\n\tVector2 = {writeFunction = writeVector2ToBuffer, accessorType = \"VEC2\", componentType = ComponentTypeEnum.Float},\n\tVector3 = {writeFunction = writeVector3ToBuffer, accessorType = \"VEC3\", componentType = ComponentTypeEnum.Float},\n}\n\nreturn function(array, arrayType)\n\tlocal data = TYPE_DATA_TABLE[arrayType]\n\tif data == nil then return nil end\n\treturn generateUri(array, data)\nend"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

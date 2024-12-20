@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "GltfMaterial",
+ "referent": "RBXfff656e860bc4999949f92b667a52175",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "GltfMaterial"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{372174c4-7d96-41dc-be03-b29664558f67}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local GltfMaterial = {}\nGltfMaterial.__index = GltfMaterial\nGltfMaterial.__objectType = \"GltfMaterial\"\n\nfunction GltfMaterial.new()\n\tlocal self = setmetatable({\n\t\t_exporter = nil,\n\t\t_name = nil,\n\t\t_diffuse = nil,\n\t\t_color = nil,\n\t\t_normal = nil,\n\t\t_metallicRoughness = nil,\n\t\t_doubleSided = false,\n\t\t_metallicFactor = 0,\n\t\t_roughnessFactor = 0.5,\n\t\t_transparency = 0,\n\t}, GltfMaterial)\n\n\treturn self\nend\n\nfunction GltfMaterial:SetExporter(exporter)\n\tself._exporter = exporter\nend\n\nfunction GltfMaterial:SetName(name)\n\tself._name = name\nend\n\nfunction GltfMaterial:SetColor(color)\n\tself._color = color\nend\n\nfunction GltfMaterial:SetTransparency(transparency)\n\tself._transparency = transparency\nend\n\nfunction GltfMaterial:SetDiffuse(diffuse)\n\tself._diffuse = diffuse\nend\n\nfunction GltfMaterial:SetNormal(normal)\n\tself._normal = normal\nend\n\nfunction GltfMaterial:SetMetallicRoughness(metallicRoughness)\n\tself._metallicRoughness = metallicRoughness\nend\n\nfunction GltfMaterial:ToJsonData()\n\tlocal jsonData = {\n\t\tname = self._name,\n\t\tdoubleSided  = self._doubleSided,\n\t\tpbrMetallicRoughness = {}\n\t}\n\t\n\tif self._diffuse == nil then\n\t\tjsonData.pbrMetallicRoughness.baseColorFactor = {\n\t\t\tself._color.r,\n\t\t\tself._color.g,\n\t\t\tself._color.b,\n\t\t\t1 - self._transparency\n\t\t}\n\telse\n\t\tjsonData.pbrMetallicRoughness.baseColorTexture = {\n\t\t\tindex = self._exporter:GetObjectIndex(self._diffuse)\n\t\t}\n\tend\n\t\n\tif self._normal ~= nil then\n\t\tjsonData.normalTexture = {\n\t\t\tindex = self._exporter:GetObjectIndex(self._normal)\n\t\t}\n\tend\n\t\n\tif self._metallicRoughness == nil then\n\t\tjsonData.pbrMetallicRoughness.metallicFactor = self._metallicFactor\n\t\tjsonData.pbrMetallicRoughness.roughnessFactor = self._roughnessFactor\n\telse\n\t\tjsonData.pbrMetallicRoughness.metallicRoughnessTexture = {\n\t\t\tindex = self._exporter:GetObjectIndex(self._metallicRoughness)\n\t\t}\n\tend\n\n\treturn jsonData\nend\n\nfunction GltfMaterial:Destroy()\n\tself._exporter = nil\n\tself._diffuse = nil\n\tself._normal = nil\n\tself._metallicRoughness = nil\nend\n\nreturn GltfMaterial"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

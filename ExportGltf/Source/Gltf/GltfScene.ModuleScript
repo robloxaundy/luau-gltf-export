@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "GltfScene",
+ "referent": "RBX6cd0ef4109074100ba2d660ea12f04eb",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "GltfScene"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{90a7f416-7a31-4085-a6fe-d1b18c4d3523}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local GltfScene = {}\nGltfScene.__index = GltfScene\nGltfScene.__objectType = \"GltfScene\"\n\nfunction GltfScene.new()\n\tlocal self = setmetatable({\n\t\t_exporter = nil,\n\t\t_name = nil,\n\t\t_nodes = {}\n\t}, GltfScene)\n\t\n\treturn self\nend\n\nfunction GltfScene:SetExporter(exporter)\n\tself._exporter = exporter\nend\n\nfunction GltfScene:SetName(name)\n\tself._name = name\nend\n\nfunction GltfScene:AddNode(node)\n\ttable.insert(self._nodes, node)\nend\n\nfunction GltfScene:ToJsonData()\n\tlocal jsonData = {\n\t\tname = self._name,\n\t\tnodes = {}\n\t}\n\t\n\tfor _, node in self._nodes do\n\t\ttable.insert(jsonData.nodes, self._exporter:GetObjectIndex(node))\n\tend\n\t\n\treturn jsonData\nend\n\nfunction GltfScene:Destroy()\n\tself._exporter = nil\nend\n\nreturn GltfScene"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

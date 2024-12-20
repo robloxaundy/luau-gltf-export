@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "Vector4",
+ "referent": "RBXd3808b8ce7584db4bba801e1ba070e4e",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "Vector4"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{99479cc9-3508-4f32-bfda-b37bfb52d65c}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local SourceFolder = script.Parent.Parent\n\nlocal GetObjectType = require(SourceFolder.Utilities.GetObjectType)\n\nlocal Vector4 = {}\nVector4.__index = Vector4\nVector4.__objectType = \"Vector4\"\n\nfunction Vector4.new(x : number, y : number, z : number, w : number)\n\tlocal self = setmetatable({\n\t\tx = x,\n\t\ty = y,\n\t\tz = z,\n\t\tw = w or 1,\n\t}, Vector4)\n\n\treturn self\nend\n\nfunction Vector4.fromVector3(vector3)\n\treturn Vector4.new(vector3.X, vector3.Y, vector3.Z, 1)\nend\n\nfunction Vector4.addVector(a, b)\n\treturn Vector4.new(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w)\nend\n\nfunction Vector4.__add(a, b)\n\tif b.__index ~= Vector4.__index then\n\t\terror(\"attempt to perform arithmetic (add) on Vector4 and non Vector4 value\")\n\tend\n\treturn Vector4.addVector(a, b)\nend\n\nfunction Vector4.subtractVector(a, b)\n\treturn Vector4.new(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w)\nend\n\nfunction Vector4.__sub(a, b)\n\tif b.__index ~= Vector4.__index then\n\t\terror(\"attempt to perform arithmetic (sub) on Vector4 and non Vector4 value\")\n\tend\n\treturn Vector4.subtractVector(a, b)\nend\n\nfunction Vector4.multiplyNumber(a, b : number)\n\treturn Vector4.new(a.x * b, a.y * b, a.z * b, a.w * b)\nend\n\nfunction Vector4.multiplyVector(a, b)\n\treturn Vector4.new(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w)\nend\n\nlocal VECTOR_MULTIPLICATION_HANDLERS = {\n\tnumber = Vector4.multiplyNumber,\n\tVector4 = Vector4.multiplyVector4,\n}\n\nfunction Vector4.__mul(a, b)\n\tlocal bType = GetObjectType(b)\n\n\tif VECTOR_MULTIPLICATION_HANDLERS[bType] == nil then\n\t\terror(\"attempt to perform arithmetic (mul) on Vector4 and \" .. bType)\n\tend\n\n\treturn VECTOR_MULTIPLICATION_HANDLERS[bType](a, b)\nend\n\nfunction Vector4.divideNumber(a, b : number)\n\treturn Vector4.new(a.x / b, a.y / b, a.z / b, a.w / b)\nend\n\nfunction Vector4.divideVector(a, b)\n\treturn Vector4.new(a.x / b.x, a.y / b.y, a.z / b.z, a.w / b.w)\nend\n\nlocal VECTOR_DIVISION_HANDLERS = {\n\tnumber = Vector4.multiplyNumber,\n\tVector4 = Vector4.multiplyVector4,\n}\n\nfunction Vector4.__div(a, b)\n\tlocal bType = GetObjectType(b)\n\n\tif VECTOR_DIVISION_HANDLERS[bType] == nil then\n\t\terror(\"attempt to perform arithmetic (div) on Vector4 and \" .. bType)\n\tend\n\n\treturn VECTOR_DIVISION_HANDLERS[bType](a, b)\nend\n\nfunction Vector4:dot(other)\n\treturn self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w\nend\n\nVECTOR_GET_HANDLERS = {\n\tfunction(a) return a.x end,\n\tfunction(a) return a.y end,\n\tfunction(a) return a.z end,\n\tfunction(a) return a.w end\n}\n\nfunction Vector4:getValue(index : number) \n\treturn VECTOR_GET_HANDLERS[index](self)\nend\n\n\nfunction Vector4:toVector3()\n\treturn Vector3.new(self.x / self.w, self.y / self.w, self.z / self.w)\nend\n\n\nreturn Vector4\n"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

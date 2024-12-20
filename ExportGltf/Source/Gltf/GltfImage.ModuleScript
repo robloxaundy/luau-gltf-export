@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "GltfImage",
+ "referent": "RBXe22525194efd4a0bb2e4bb79707aecb4",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "GltfImage"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{f7907c8b-1c8f-4130-9a13-58614e49ebec}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local GltfImage = {}\nGltfImage.__index = GltfImage\nGltfImage.__objectType = \"GltfImage\"\n\nfunction GltfImage.new()\n\tlocal self = setmetatable({\n\t\t_exporter = nil,\n\t\t_name = nil,\n\t\t_mimeType = nil,\n\t\t_uri = nil\n\t}, GltfImage)\n\n\treturn self\nend\n\nfunction GltfImage:SetExporter(exporter)\n\tself._exporter = exporter\nend\n\nfunction GltfImage:SetName(name)\n\tself._name = name\nend\n\nfunction GltfImage:SetMimeType(mimeType)\n\tself._mimeType = mimeType\nend\n\nfunction GltfImage:SetUri(uri)\n\tself._uri = uri\nend\n\nfunction GltfImage:ToJsonData()\n\tlocal jsonData = {\n\t\tname = self._name,\n\t\tmimeType = self._mimeType,\n\t\turi = self._uri,\n\t}\n\n\treturn jsonData\nend\n\nfunction GltfImage:Destroy()\n\tself._exporter = nil\nend\n\nreturn GltfImage"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

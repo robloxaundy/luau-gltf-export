@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "IndexedLookup",
+ "referent": "RBX620fdaf78fd94ebfad0fa7c6718bd816",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "IndexedLookup"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{cb67da93-0296-44a2-bfc0-6c920c796369}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local IndexedLookup = {}\nIndexedLookup.__index = IndexedLookup\nIndexedLookup.__objectType = \"IndexedLookup\"\n\nfunction IndexedLookup.new()\n\tlocal self = setmetatable({\n\t\tvalues = {},\n\t\tlookup = {},\n\t}, IndexedLookup)\nend\n\nfunction IndexedLookup:insert(value)\n\tif self.lookup[value] then\n\t\terror(\"Value already exists in the IndexLookup\")\n\tend\n\t\n\ttable.insert(self.values, value)\n\tself.lookup[value] = #self.values\n\treturn #self.values\nend\n\nfunction IndexedLookup:GetValues()\n\treturn self.values\nend\n\nfunction IndexedLookup:FindIndex(value)\n\treturn self.lookup[value]\nend\n\nfunction IndexedLookup:Destroy()\n\tself.values = {}\n\tself.lookup = {}\nend\n\nreturn IndexedLookup"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "PngEncoder",
+ "referent": "RBXe77380365f9e459aafb68c34f3c65b64",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "PngEncoder"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{e74c26dd-be82-4236-882c-abd39953f7f2}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "--[[\n\tAddapted from https://github.com/wyozi/lua-pngencoder/tree/master\n\t\tWhich in turn addapted https://www.nayuki.io/page/tiny-png-output\n\t\n\tThis whole thing can be made wayyy more efficent with more buffer usage\n]]\n\nlocal PngEncoder = {}\nPngEncoder.__index = PngEncoder\n\nlocal DEFLATE_MAX_BLOCK_SIZE = 65535\n\nlocal function putBigUint32(val, tbl, index)\n\tfor i=0,3 do\n\t\ttbl[index + i] = bit32.band(bit32.rshift(val, (3 - i) * 8), 0xFF)\n\tend\nend\n\nfunction PngEncoder:writeBytes(data, index, length)\n\tindex = index or 1\n\tlength = length or #data\n\tfor i = index, index + length - 1 do\n\t\tbuffer.writeu8(self.outBuffer, self.offset, data[i])\n\t\tself.offset += 1\n\tend\nend\n\nfunction PngEncoder:write(pixels)\n\tlocal count = #pixels  -- Byte count\n\tlocal pixelPointer = 1\n\twhile count > 0 do\n\t\tif self.positionY >= self.height then\n\t\t\terror(\"All image pixels already written\")\n\t\tend\n\n\t\tif self.deflateFilled == 0 then -- Start DEFLATE block\n\t\t\tlocal size = DEFLATE_MAX_BLOCK_SIZE\n\t\t\tif (self.uncompRemain < size) then\n\t\t\t\tsize = self.uncompRemain\n\t\t\tend\n\t\t\tlocal header = {  -- 5 bytes long\n\t\t\t\tbit32.band((self.uncompRemain <= DEFLATE_MAX_BLOCK_SIZE and 1 or 0), 0xFF),\n\t\t\t\tbit32.band(bit32.rshift(size, 0), 0xFF),\n\t\t\t\tbit32.band(bit32.rshift(size, 8), 0xFF),\n\t\t\t\tbit32.band(bit32.bxor(bit32.rshift(size, 0), 0xFF), 0xFF),\n\t\t\t\tbit32.band(bit32.bxor(bit32.rshift(size, 8), 0xFF), 0xFF),\n\t\t\t}\n\t\t\tself:writeBytes(header)\n\t\t\tself:crc32(header, 1, #header)\n\t\tend\n\t\tassert(self.positionX < self.lineSize and self.deflateFilled < DEFLATE_MAX_BLOCK_SIZE)\n\n\t\tif (self.positionX == 0) then  -- Beginning of line - write filter method byte\n\t\t\tlocal b = {0}\n\t\t\tself:writeBytes(b)\n\t\t\tself:crc32(b, 1, 1)\n\t\t\tself:adler32(b, 1, 1)\n\t\t\tself.positionX = self.positionX + 1\n\t\t\tself.uncompRemain = self.uncompRemain - 1\n\t\t\tself.deflateFilled = self.deflateFilled + 1\n\t\telse -- Write some pixel bytes for current line\n\t\t\tlocal n = DEFLATE_MAX_BLOCK_SIZE - self.deflateFilled\n\t\t\tif (self.lineSize - self.positionX < n) then\n\t\t\t\tn = self.lineSize - self.positionX\n\t\t\tend\n\t\t\tif (count < n) then\n\t\t\t\tn = count\n\t\t\tend\n\t\t\tassert(n > 0)\n\n\t\t\tself:writeBytes(pixels, pixelPointer, n)\n\n\t\t\t-- Update checksums\n\t\t\tself:crc32(pixels, pixelPointer, n)\n\t\t\tself:adler32(pixels, pixelPointer, n)\n\n\t\t\t-- Increment positions\n\t\t\tcount = count - n\n\t\t\tpixelPointer = pixelPointer + n\n\t\t\tself.positionX = self.positionX + n\n\t\t\tself.uncompRemain = self.uncompRemain - n\n\t\t\tself.deflateFilled = self.deflateFilled + n\n\t\tend\n\n\t\tif (self.deflateFilled >= DEFLATE_MAX_BLOCK_SIZE) then\n\t\t\tself.deflateFilled = 0 -- End current block\n\t\tend\n\n\t\tif (self.positionX == self.lineSize) then  -- Increment line\n\t\t\tself.positionX = 0\n\t\t\tself.positionY = self.positionY + 1\n\t\t\tif (self.positionY == self.height) then -- Reached end of pixels\n\t\t\t\tlocal footer = {  -- 20 bytes long\n\t\t\t\t\t0, 0, 0, 0,  -- DEFLATE Adler-32 placeholder\n\t\t\t\t\t0, 0, 0, 0,  -- IDAT CRC-32 placeholder\n\t\t\t\t\t-- IEND chunk\n\t\t\t\t\t0x00, 0x00, 0x00, 0x00,\n\t\t\t\t\t0x49, 0x45, 0x4E, 0x44,\n\t\t\t\t\t0xAE, 0x42, 0x60, 0x82,\n\t\t\t\t}\n\t\t\t\tputBigUint32(self.adler, footer, 1)\n\t\t\t\tself:crc32(footer, 1, 4)\n\t\t\t\tputBigUint32(self.crc, footer, 5)\n\t\t\t\tself:writeBytes(footer)\n\t\t\t\tself.done = true\n\t\t\tend\n\t\tend\n\tend\nend\n\nfunction PngEncoder:crc32(data, index, len)\n\tself.crc = bit32.bnot(self.crc)\n\tfor i = index, index + len - 1 do\n\t\tlocal byte = data[i]\n\t\tfor j = 0, 7 do  -- Inefficient bitwise implementation, instead of table-based\n\t\t\tlocal nbit = bit32.band(bit32.bxor(self.crc, bit32.rshift(byte, j)), 1)\n\t\t\tself.crc = bit32.bxor(bit32.rshift(self.crc, 1), bit32.band((-nbit), 0xEDB88320))\n\t\tend\n\tend\n\tself.crc = bit32.bnot(self.crc)\nend\nfunction PngEncoder:adler32(data, index, len)\n\tlocal s1 = bit32.band(self.adler, 0xFFFF)\n\tlocal s2 = bit32.rshift(self.adler, 16)\n\tfor i = index, index + len - 1 do\n\t\ts1 = (s1 + data[i]) % 65521\n\t\ts2 = (s2 + s1) % 65521\n\tend\n\tself.adler = bit32.bor(bit32.lshift(s2, 16), s1)\nend\n\nfunction PngEncoder.new(width, height, colorMode)\n\tlocal self = setmetatable({\n\t\twidth = width,\n\t\theight = height,\n\t\tdone = false,\n\t\toutBuffer = buffer.create(1024 * 1024 * 4 + 2048 * 4), -- 2048 * 4 just so we have some... 'buffer' ;)\n\t\toffset = 0,\n\t}, PngEncoder)\n\t-- Default to rgb\n\tcolorMode = colorMode or \"rgb\"\n\n\t-- Determine bytes per pixel and the PNG internal color type\n\tlocal bytesPerPixel, colorType\n\tif colorMode == \"rgb\" then\n\t\tbytesPerPixel, colorType = 3, 2\n\telseif colorMode == \"rgba\" then\n\t\tbytesPerPixel, colorType = 4, 6\n\telse\n\t\terror(\"Invalid colorMode\")\n\tend\n\n\t-- Compute and check data siezs\n\tself.lineSize = width * bytesPerPixel + 1\n\t-- TODO: check if lineSize too big\n\n\tself.uncompRemain = self.lineSize * height\n\n\tlocal numBlocks = math.ceil(self.uncompRemain / DEFLATE_MAX_BLOCK_SIZE)\n\n\t-- 5 bytes per DEFLATE uncompressed block header, 2 bytes for zlib header, 4 bytes for zlib Adler-32 footer\n\tlocal idatSize = numBlocks * 5 + 6\n\tidatSize = idatSize + self.uncompRemain\n\n\t-- TODO check if idatSize too big\n\n\tlocal header = {  -- 43 bytes long\n\t\t-- PNG header\n\t\t0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,\n\t\t-- IHDR chunk\n\t\t0x00, 0x00, 0x00, 0x0D,\n\t\t0x49, 0x48, 0x44, 0x52,\n\t\t0, 0, 0, 0,  -- 'width' placeholder\n\t\t0, 0, 0, 0,  -- 'height' placeholder\n\t\t0x08, colorType, 0x00, 0x00, 0x00,\n\t\t0, 0, 0, 0,  -- IHDR CRC-32 placeholder\n\t\t-- IDAT chunk\n\t\t0, 0, 0, 0,  -- 'idatSize' placeholder\n\t\t0x49, 0x44, 0x41, 0x54,\n\t\t-- DEFLATE data\n\t\t0x08, 0x1D,\n\t}\n\tputBigUint32(width, header, 17)\n\tputBigUint32(height, header, 21)\n\tputBigUint32(idatSize, header, 34)\n\n\tself.crc = 0\n\tself:crc32(header, 13, 17)\n\tputBigUint32(self.crc, header, 30)\n\tself:writeBytes(header)\n\n\tself.crc = 0\n\tself:crc32(header, 38, 6)  -- 0xD7245B6B\n\tself.adler = 1\n\n\tself.positionX = 0\n\tself.positionY = 0\n\tself.deflateFilled = 0\n\n\treturn self\nend\n\nreturn PngEncoder"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "MeshIdentifier",
+ "referent": "RBX8260f775c9ab48ff8870fc875cf7b2f1",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "MeshIdentifier"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{e213767b-8712-4555-a81b-be5fcbea66cb}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "--[[\n\tMeshIdentifier is used for loading metadata and deduplication\n\tthe idea is that for any two given parts with geometry, if their MeshIdentifier._string is the same then the share the same mesh\n]]\n\nlocal SourceFolder = script.Parent.Parent.Parent\n\nlocal RemoveNils = require(SourceFolder.Utilities.RemoveNils)\n\nlocal MeshIdentifier = {}\nMeshIdentifier.__index = MeshIdentifier\nMeshIdentifier.__objectType = \"MeshIdentifier\"\n\nfunction MeshIdentifier.new(instance)\n\tlocal self = setmetatable({\n\t\t_instance = instance,\n\t\t_string = nil,\n\t\t_colorString = \"\",\n\t\t_shape = nil,\n\t\t_color = nil,\n\t\t_meshId = nil,\n\t}, MeshIdentifier)\n\t\n\tself:_generate()\n\n\treturn self\nend\n\nlocal PART_TYPE_TO_SHAPE = {\n\t[Enum.PartType.Block] = \"Block\",\n\t[Enum.PartType.Wedge] = \"Wedge\",\n\t[Enum.PartType.Cylinder] = \"Cylinder\",\n\t[Enum.PartType.Ball] = \"Ball\",\n\t[Enum.PartType.CornerWedge] = \"CornerWedge\",\n}\n\nlocal function getShapeFromInstance(instance)\n\tif instance:IsA(\"MeshPart\") then\n\t\treturn \"AssetId\"\n\tend\n\t\n\tif instance:IsA(\"BasePart\") then\n\t\t-- TODO: Check for special meshes\n\t\tif instance:IsA(\"Part\") then\n\t\t\treturn PART_TYPE_TO_SHAPE[instance.Shape]\n\t\tend\n\tend\nend\n\nlocal function getColorFromInstance(instance : Instance)\n\tif instance:IsA(\"BasePart\") then\n\t\treturn instance.Color\n\tend\nend\n\nlocal function getAssetIdFromInstance(instance : Instance)\n\tif instance:IsA(\"MeshPart\") then\n\t\treturn instance.MeshId\n\tend\nend\n\n--[[\n\tCurrently supported shapes:\n\t\tBlock, Ball, CornerWedge, Wedge, Cylinder, AssetId\n]]\n\nfunction MeshIdentifier:_generate()\n\tself._shape = getShapeFromInstance(self._instance)\n\t\n\tif not self._shape then return end\n\t\n\tif self._shape == \"AssetId\" then\n\t\tself._meshId = getAssetIdFromInstance(self._instance)\n\tend\n\t\n\tself._color = getColorFromInstance(self._instance)\n\tif self._color then\n\t\tself._colorString = table.concat({\"{\", tostring(self._color), \"}\"})\n\tend\n\t\n\t-- This can be extended later with more complex logic if needed\n\tself._string = table.concat(RemoveNils({self._shape, self._meshId}))\nend\n\nfunction MeshIdentifier:GetMeshId()\n\treturn self._meshId\nend\n\nfunction MeshIdentifier:GetString()\n\treturn self._string\nend\n\nfunction MeshIdentifier:GetColorString()\n\treturn self._colorString\nend\n\nfunction MeshIdentifier:GetStringWithColor()\n\treturn self._string .. self._colorString\nend\n\nfunction MeshIdentifier:GetShape()\n\treturn self._shape\nend\n\nfunction MeshIdentifier:GetColor()\n\treturn self._color\nend\nfunction MeshIdentifier:Destroy()\n\tself._instance = nil\nend\n\nreturn MeshIdentifier"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

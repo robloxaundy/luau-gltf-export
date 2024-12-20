@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "GltfMesh",
+ "referent": "RBX39f1fa80f9354ca8aa404fd988e540f7",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "GltfMesh"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{0cea2f6e-739c-4e8a-9b72-e696ca181355}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "--[[\n\tA mesh is a set of primitives to be rendered.\n]]\n\nlocal GltfMesh = {}\nGltfMesh.__index = GltfMesh\nGltfMesh.__objectType = \"GltfMesh\"\n\nfunction GltfMesh.new()\n\tlocal self = setmetatable({\n\t\t_exporter = nil,\n\t\t_name = nil,\n\t\t_primitives = {}\n\t}, GltfMesh)\n\n\treturn self\nend\n\nfunction GltfMesh:SetExporter(exporter)\n\tself._exporter = exporter\nend\n\nfunction GltfMesh:SetName(name)\n\tself._name = name\nend\n\nfunction GltfMesh:AddPrimitive(primitive)\n\ttable.insert(self._primitives, primitive)\nend\n\nfunction GltfMesh:ToJsonData()\n\tlocal jsonData = {\n\t\tname = self._name,\n\t\tprimitives = {}\n\t}\n\t\n\tfor _, primitive in self._primitives do\n\t\ttable.insert(jsonData.primitives, primitive:ToJsonData())\n\tend\n\n\treturn jsonData\nend\n\nfunction GltfMesh:Destroy()\n\tself._exporter = nil\nend\n\nreturn GltfMesh"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

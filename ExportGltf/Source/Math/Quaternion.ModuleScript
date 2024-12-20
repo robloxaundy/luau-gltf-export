@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "Quaternion",
+ "referent": "RBXbc1c038143f54bd4bffde6f77adffdf5",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "Quaternion"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{854819a8-6f93-4029-bac4-143da1204699}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local SourceFolder = script.Parent.Parent\n\nlocal GetObjectType = require(SourceFolder.Utilities.GetObjectType)\n\nlocal Quaternion = {}\nQuaternion.__index = Quaternion\nQuaternion.__objectType = \"Quaternion\"\n\nfunction Quaternion.new(x, y, z, w)\n\tlocal self = setmetatable({\n\t\tx = x,\n\t\ty = y,\n\t\tz = z,\n\t\tw = w\n\t}, Quaternion)\n\treturn self\nend\n\nfunction Quaternion.fromMatrix(matrix)\n\tlocal x, y, z, w\n\tlocal tr = matrix[1][1] + matrix[2][2] + matrix[3][3];\n\tif (tr > 0) then\n\t\tlocal s = math.sqrt(tr + 1)\n\t\tw = s * 0.5\n\t\ts = 0.5 / s\n\t\tx = (matrix[3][2] - matrix[2][3]) * s\n\t\ty = (matrix[1][3] - matrix[3][1]) * s\n\t\tz = (matrix[2][1] - matrix[1][2]) * s\n\t\t\n\telseif ((matrix[1][1] > matrix[2][2]) and (matrix[1][1] > matrix[3][3])) then\n\t\tlocal s = -math.sqrt(1 + matrix[1][1] - matrix[2][2] - matrix[3][3])\n\t\tx = s * 0.5\n\t\ts = 0.5 / s\n\t\ty = (matrix[1][2] + matrix[2][1]) * s\n\t\tz = (matrix[1][3] + matrix[3][1]) * s\n\t\tw = (matrix[3][2] - matrix[2][3]) * s\n\telseif (matrix[2][2] > matrix[3][3]) then\n\t\tlocal s = -math.sqrt(1 + matrix[2][2] - matrix[1][1] - matrix[3][3])\n\t\ty = s * 0.5\n\t\ts = 0.5 / s\n\t\tx = (matrix[1][2] + matrix[2][1]) * s\n\t\tz = (matrix[2][3] + matrix[3][2]) * s\n\t\tw = (matrix[1][3] - matrix[3][1]) * s\n\telse\n\t\tlocal s = -math.sqrt(1 + matrix[3][3] - matrix[1][1] - matrix[2][2])\n\t\tz = s * 0.5\n\t\ts = 0.5 / s\n\t\tx = (matrix[1][3] + matrix[3][1]) * s\n\t\ty = (matrix[2][3] + matrix[3][2]) * s\n\t\tw = (matrix[2][1] - matrix[1][2]) * s\n\tend\n\treturn Quaternion.new(x, y, z, w)\nend\n\nfunction Quaternion:imag()\n\treturn Vector3.new(self.x, self.y, self.z)\nend\n\nfunction Quaternion.multiplyNumber(a, b : number)\n\treturn Quaternion.new(a.x * b, a.y * b, a.z * b, a.w * b)\nend\n\nfunction Quaternion.multiplyQuaternion(a, b)\n\t-- Following Watt & Watt, page 360\n\tlocal v1 = a:imag()\n\tlocal v2 = b:imag()\n\tlocal s1 = a.w\n\tlocal s2 = b.w\n\treturn Quaternion.new(s1 * v2 + s2 * v1 + v1:cross(v2), s1 * s2 - v1:dot(v2))\nend\n\nlocal QUATERNION_MULTIPLICATION_HANDLERS = {\n\tnumber = Quaternion.multiplyNumber,\n\tVector4 = Quaternion.multiplyQuaternion,\n}\n\nfunction Quaternion.__mul(a, b)\n\tlocal bType = GetObjectType(b)\n\n\tif QUATERNION_MULTIPLICATION_HANDLERS[bType] == nil then\n\t\terror(\"attempt to perform arithmetic (mul) on Quaternion and \" .. bType)\n\tend\n\n\treturn QUATERNION_MULTIPLICATION_HANDLERS[bType](a, b)\nend\n\nfunction Quaternion:magnitude()\n\treturn math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z + self.w * self.w)\nend\n\nfunction Quaternion:normalized()\n\treturn self * (1 / self:magnitude())\nend\n\nreturn Quaternion\n"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}

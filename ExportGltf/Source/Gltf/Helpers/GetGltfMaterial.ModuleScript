@@ -1,0 +1,60 @@
+{
+ "className": "ModuleScript",
+ "name": "GetGltfMaterial",
+ "referent": "RBX1ad025e5acd049a7ad80902f732428ce",
+ "properties": {
+  "AttributesSerialize": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Tags": {
+   "_propertyType": "BinaryString",
+   "values": {}
+  },
+  "Capabilities": {
+   "_propertyType": "SecurityCapabilities",
+   "values": {
+    "_": "0"
+   }
+  },
+  "DefinesCapabilities": {
+   "_propertyType": "bool",
+   "values": {
+    "_": "false"
+   }
+  },
+  "LinkedSource": {
+   "_propertyType": "Content",
+   "values": {
+    "null": [
+     ""
+    ]
+   }
+  },
+  "Name": {
+   "_propertyType": "string",
+   "values": {
+    "_": "GetGltfMaterial"
+   }
+  },
+  "ScriptGuid": {
+   "_propertyType": "string",
+   "values": {
+    "_": "{4bdd9f8a-ca92-48bf-9039-83346ba6ce58}"
+   }
+  },
+  "Source": {
+   "_propertyType": "ProtectedString",
+   "values": {
+    "_": "local SourceFolder = script.Parent.Parent.Parent\n\nlocal GltfMaterial = require(SourceFolder.Gltf.GltfMaterial)\n\nlocal GetGltfSimpleTexture = require(SourceFolder.Gltf.Helpers.GetGltfSimpleTexture)\nlocal GetGltfMetallicRoughnessTexture = function() end\n\nreturn function(exporter, materialIdentifier)\n\tlocal material = exporter._caches.materialLookup[materialIdentifier:GetString()]\n\tif material then return material end\n\tmaterial = GltfMaterial.new()\n\tmaterial:SetExporter(exporter)\n\tmaterial:SetColor(materialIdentifier:GetColor())\n\tmaterial:SetTransparency(materialIdentifier:GetTransparency())\n\t\n\tlocal diffuseId = materialIdentifier:GetDiffuseId()\n\tif diffuseId then\n\t\tmaterial:SetDiffuse(GetGltfSimpleTexture(exporter, diffuseId))\n\tend\n\t\n\tlocal normalId = materialIdentifier:GetNormalId()\n\tif normalId then\n\t\tmaterial:SetNormal(GetGltfSimpleTexture(exporter, normalId))\n\tend\n\t\n\tlocal metalnessId = materialIdentifier:GetMetalnessId()\n\tlocal roughnessId = materialIdentifier:GetRoughnessId()\n\tif roughnessId or metalnessId then\n\t\tmaterial:SetMetallicRoughness(GetGltfMetallicRoughnessTexture(exporter, diffuseId))\n\tend\n\t\n\texporter.materials[material] = true\n\texporter._caches.materialLookup[materialIdentifier:GetString()] = material\n\t\n\treturn material\nend"
+   }
+  },
+  "SourceAssetId": {
+   "_propertyType": "int64",
+   "values": {
+    "_": "-1"
+   }
+  }
+ },
+ "_exportInfo": "Exported with rbx-export v1.1.0. Contains all properties of this instance."
+}
